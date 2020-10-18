@@ -1,17 +1,14 @@
-#include <SFML/Graphics.hpp>
+#include <SFML\Graphics.hpp>
 #include <iostream>
-#include "Animation.h"
+#include "Player.h"
 
 int main()
 {
 	sf::RenderWindow window(sf::VideoMode(1300, 800), "SFML Tutorial", sf::Style::Close | sf::Style::Resize);
-	sf::RectangleShape player(sf::Vector2f(80.0f, 100.0f));
-	player.setPosition(206.0f, 206.0f);
 	sf::Texture playerTexture;
-	playerTexture.loadFromFile("d1.png");
-	player.setTexture(&playerTexture);
+	playerTexture.loadFromFile("doc-1.png");
 
-	Animation animation(&playerTexture, sf::Vector2u(3, 3), 0.3f);
+	Player player(&playerTexture, sf::Vector2u(5, 5), 0.3, 100.0f);
 
 	float deltaTime = 0.0f;
 	sf::Clock clock;
@@ -26,43 +23,18 @@ int main()
 		{
 			switch (evnt.type)
 			{
-				case sf::Event::Closed:
-					window.close();
-					break;
-				case sf::Event::Resized:
-					printf("New window width: %i New window height: %i\n", evnt.size.width, evnt.size.height);
-					break;
-				case sf::Event::TextEntered:
-					if (evnt.text.unicode < 128)
-					{
-					printf("%c", evnt.text.unicode);
-					}
-					
+			case sf::Event::Closed:
+				window.close();
+				break;	
 			}
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-		{
-			player.move(-0.1f, 0.0f);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-		{
-			player.move(0.1f, 0.0f);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
-		{
-			player.move(0.0f, -0.1f);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-		{
-			player.move(0.0f, 0.1f);
-		}
+		
 
-		animation.Update(0, deltaTime);
-		player.setTextureRect(animation.uvRect);
+		player.Update(deltaTime);
 
 
 		window.clear(sf::Color(150,150,150));
-		window.draw(player);
+		player.Draw(window);
 		window.display();
 	}
 	
