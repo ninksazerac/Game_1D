@@ -34,7 +34,7 @@ void Animation::Update(int row, float deltaTime, bool faceRight)
 	}
 
 
-	
+
 	uvRect.top = currentImage.y * uvRect.height;
 
 	if (faceRight)

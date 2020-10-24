@@ -8,7 +8,7 @@ int main()
 	sf::Texture playerTexture;
 	playerTexture.loadFromFile("doc-1.png");
 
-	Player player(&playerTexture, sf::Vector2u(5, 5), 0.3, 100.0f);
+	Player player(&playerTexture, sf::Vector2u(5, 5), 0.3, 150.0f);
 
 	float deltaTime = 0.0f;
 	sf::Clock clock;
@@ -25,19 +25,19 @@ int main()
 			{
 			case sf::Event::Closed:
 				window.close();
-				break;	
+				break;
 			}
 		}
-		
+
 
 		player.Update(deltaTime);
 
 
-		window.clear(sf::Color(150,150,150));
+		window.clear(sf::Color(100, 100, 150));
 		player.Draw(window);
 		window.display();
 	}
-	
+
 	return 0;
 
 }
