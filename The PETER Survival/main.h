@@ -15,7 +15,7 @@ private:
 
 	//Player
 	Player* player;
-	
+
 	//Private function
 	void initWindow();
 	void initTextures();
