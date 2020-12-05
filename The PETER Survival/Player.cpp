@@ -35,7 +35,7 @@ void Player::Update(float deltaTime)
 		}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) //»ØèÁâ¨ÁµÕ
 		{
-		
+
 		}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && canJump)
 		if (body.getPosition().y > 450.0f)
@@ -81,6 +81,7 @@ void Player::Update(float deltaTime)
 void Player::Draw(sf::RenderWindow& window)
 {
 	window.draw(body);
+	
 }
 
 void Player::OnColider(sf::Vector2f direction)
@@ -112,3 +113,4 @@ void Player::setPosition(sf::Vector2f position)
 {
 	body.setPosition(position);
 }
+

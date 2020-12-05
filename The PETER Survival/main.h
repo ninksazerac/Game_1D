@@ -1,5 +1,6 @@
 #pragma once
 #include "Player.h"
+#include <map>
 
 class Game
 {
@@ -8,6 +9,8 @@ private:
 	//Window
 	sf::RenderWindow* window;
 
+	//Resources
+	std::map<std::string, sf::Texture*>initTextures;
 
 	//World
 	sf::Sprite worldBackground;

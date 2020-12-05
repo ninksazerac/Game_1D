@@ -98,6 +98,7 @@ int main()
 	//à»Ô´à¡ÁÁÒ
 	while (window.isOpen())
 	{
+
 		while (game == 0)
 		{
 			while (window.pollEvent(evnt))
@@ -214,6 +215,13 @@ int main()
 
 			}
 
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+			{
+				game = 0;
+			}
+
+
+
 
 			//ÅçÍ¤©Ò¡äÁèãËéàÅ×èÍ¹à¡Ô¹¢Íº«éÒÂ
 			if (player.GetPosition().x >= 900 && player.GetPosition().x <= 6223)
@@ -273,4 +281,3 @@ int main()
 		return 0;
 	}
 }
-

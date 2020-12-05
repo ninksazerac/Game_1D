@@ -13,6 +13,9 @@ public:
 	void Draw(sf::RenderWindow& window);
 	void OnColider(sf::Vector2f direction);
 	void setPosition(sf::Vector2f position);
+	
+	
+	
 	sf::Vector2f GetPosition() { return body.getPosition(); }
 	Collider GetCollider() { return Collider(body); }
 	sf::FloatRect GetGlobal() { return body.getGlobalBounds(); }
