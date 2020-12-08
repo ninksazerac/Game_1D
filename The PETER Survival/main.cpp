@@ -34,9 +34,29 @@ int main()
 	////////////////////////////
 	int game = 0;
 	sf::Event evnt;
-	int  Scorecurrent = 0;
+	int  scoreCount = 0;
 	srand(time(NULL));
 
+	////////////////////////////Text
+	sf::Font word;
+	word.loadFromFile("Resource/Font/RobotoMono-BoldItalic.ttf");
+
+	sf::Text scoreText;
+	scoreText.setPosition(1800, 40);
+	scoreText.setCharacterSize(50);
+	scoreText.setFont(word);
+	scoreText.setFillColor(sf::Color::White);
+	scoreText.setString(to_string(scoreCount));
+
+	sf::Text score1;
+	score1.setPosition(1450, 40);
+	score1.setCharacterSize(50);
+	score1.setFont(word);
+	score1.setFillColor(sf::Color::White);
+	score1.setString("Score :");
+	
+
+	
 
 	/////////////////////////////////Menu/////////////////////////////////
 	sf::Texture bgmenuTexture;
@@ -94,18 +114,18 @@ int main()
 	enemy1pic.loadFromFile("Resource/Sprite/mon1.png");
 	enemy1.setTexture(&enemy1pic);
 	std::vector<RectangleShape> enemies1;
-	enemy1.setPosition(200, 100);
 	enemies1.push_back(RectangleShape(enemy1)); //วาดมอน1
 
 	int enemySpawnTimer = 0;
-	sf::Clock Itemclock;
-	float ItemDelay = Itemclock.getElapsedTime().asSeconds();
+	sf::Clock enemyclock;
+	float enemyDelay = enemyclock.getElapsedTime().asSeconds();
 
-	/*sf::RectangleShape enemy2(sf::Vector2f(60.0f, 80.f));
+	sf::RectangleShape enemy2(sf::Vector2f(60.0f, 80.f));
 	sf::Texture enemy2pic;
 	enemy2pic.loadFromFile("Resource/Sprite/mon2.png");
 	enemy2.setTexture(&enemy2pic);
-	std::vector<RectangleShape> enemies2;*/
+	std::vector<RectangleShape> enemies2;
+	enemies2.push_back(RectangleShape(enemy2));
 
 	sf::Vector2f playerCenter;
 	
@@ -251,29 +271,61 @@ int main()
 				if (bullet1[i].getPosition().x <= 15)
 					bullet1.erase(bullet1.begin() + i);
 			}
+
 			//enemy
-			if (enemySpawnTimer < 15)
+			//mon 1
+			if (scoreCount <= 49)
 			{
-				enemySpawnTimer++;
-			}
-				
-				if (enemySpawnTimer >= 100)
+				if (enemySpawnTimer < 30)
+				{
+					enemySpawnTimer++;
+				}
+
+				if (enemySpawnTimer >= 120)
 				{
 					enemy1.setPosition(Vector2f(2000, 470));
 					enemies1.push_back(RectangleShape(enemy1));
 					enemySpawnTimer = 0;
 				}
 				enemySpawnTimer++;
+			}
 			for (size_t i = 1; i < enemies1.size(); i++)
 			{
 				enemies1[i].move(-5.f, 0.f);
 
+
 				/*if (enemies1[i].getPosition().x > window.getSize().x);
 					enemies1.erase(enemies1.begin() + i);*/
 			}
-			//Collision
-			if (!enemies1.empty() && !bullet1.empty())
+
+			//mon 2
+			if (scoreCount >= 50)
 			{
+				if (enemySpawnTimer < 50)
+				{
+					enemySpawnTimer++;
+				}
+
+				if (enemySpawnTimer >= 70)
+				{
+					enemy2.setPosition(Vector2f(2000, 470));
+					enemies2.push_back(RectangleShape(enemy2));
+					enemySpawnTimer = 0;
+				}
+				enemySpawnTimer++;
+			}
+			for (size_t i = 1; i < enemies2.size(); i++)
+			{
+				enemies2[i].move(-5.f, 0.f);
+				
+
+				
+				/*if (enemies1[i].getPosition().x > window.getSize().x);
+					enemies1.erase(enemies1.begin() + i);*/
+			}
+
+			//Collision
+			//mon 1
 				for (size_t i = 1; i < bullet1.size(); i++)
 				{
 					for (size_t k = 1; k < enemies1.size(); k++)
@@ -282,12 +334,26 @@ int main()
 						{
 							bullet1.erase(bullet1.begin() + i);
 							enemies1.erase(enemies1.begin() + k);
+							scoreCount += 5;
 							break;
 						}
 					}
 				}
-			}
-			
+			//mon 2
+				for (size_t i = 1; i < bullet1.size(); i++)
+				{
+					for (size_t k = 1; k < enemies2.size(); k++)
+					{
+						if (bullet1[i].getGlobalBounds().intersects(enemies2[k].getGlobalBounds()))
+						{
+							bullet1.erase(bullet1.begin() + i);
+							enemies2.erase(enemies2.begin() + k);
+							scoreCount += 10;
+							break;
+						}
+					}
+				}
+
 
 			//////////////////////////////////////////////////////////////////////////////////////////
 
@@ -325,7 +391,7 @@ int main()
 			/////////////////////////////////Draw or Render/////////////////////////////////
 			window.clear();
 			
-
+			
 
 			/*window.setView(view);*/
 			window.draw(bg[0]);
@@ -338,10 +404,20 @@ int main()
 
 			player.Draw(window);
 
+			//วาด score
+			scoreText.setString(to_string(scoreCount));
+			window.draw(score1);
+			window.draw(scoreText);
 			///////////////////////////////// Draw shoots & enemies1 /////////////////////////////////
+			
+			
 			for (size_t i = 1; i < enemies1.size(); i++)
 			{
 				window.draw(enemies1[i]);
+			}
+			for (size_t i = 1; i < enemies2.size(); i++)
+			{
+				window.draw(enemies2[i]);
 			}
 			for (size_t i = 1; i < bullet1.size(); i++)
 			{
