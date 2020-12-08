@@ -1,6 +1,7 @@
 #include <SFML\Graphics.hpp>
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 #include "Player.h"
 #include "Platform.h"
 #include "Background.h"
@@ -13,6 +14,9 @@ void ResizeView(const sf::RenderWindow& window, sf::View& view) //set display ให
 	view.setSize(VIEW_HEIGHT * aspectRatio, VIEW_HEIGHT);
 }
 
+using namespace sf;
+using namespace std;
+
 int main()
 {
 
@@ -20,10 +24,20 @@ int main()
 	sf::RenderWindow window(sf::VideoMode(1920, 1080), "GUNSO!!", sf::Style::Close | sf::Style::Resize);
 	window.setVerticalSyncEnabled(true);
 	/*sf::View view(sf::Vector2f(1920.0f, 1080.0f), sf::Vector2f(1920.0f, 1080.0f));*/
+	sf::Image icon;
+	if (!icon.loadFromFile("Resource/Icon/icon.png"))
+	{
+		return -1;
+	}
+	window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());  // เซ้ท icon เกม
 
 	////////////////////////////
 	int game = 0;
 	sf::Event evnt;
+	int  Scorecurrent = 0;
+	srand(time(NULL));
+
+
 	/////////////////////////////////Menu/////////////////////////////////
 	sf::Texture bgmenuTexture;
 	bgmenuTexture.loadFromFile("Resource/Menu/menubg1.png");
@@ -72,6 +86,38 @@ int main()
 	/////////////////////////////////Jump/////////////////////////////////
 	//jump
 	std::vector<Platform> platforms;
+
+	/////////////////////////////////Enemy/////////////////////////////////
+	// v.1
+	sf::RectangleShape enemy1(sf::Vector2f(60.0f, 80.f));
+	sf::Texture enemy1pic;
+	enemy1pic.loadFromFile("Resource/Sprite/mon1.png");
+	enemy1.setTexture(&enemy1pic);
+	std::vector<RectangleShape> enemies1;
+	enemy1.setPosition(200, 100);
+	enemies1.push_back(RectangleShape(enemy1)); //วาดมอน1
+
+	int enemySpawnTimer = 0;
+
+	/*sf::RectangleShape enemy2(sf::Vector2f(60.0f, 80.f));
+	sf::Texture enemy2pic;
+	enemy2pic.loadFromFile("Resource/Sprite/mon2.png");
+	enemy2.setTexture(&enemy2pic);
+	std::vector<RectangleShape> enemies2;*/
+
+	sf::Vector2f playerCenter;
+	
+
+
+	/////////////////////////////////Bullet/////////////////////////////////
+	int shootTimer = 0;
+
+	sf::RectangleShape bullet(sf::Vector2f(30.0f, 40.f));
+	sf::Texture projectilespic;
+	projectilespic.loadFromFile("Resource/Weapon/weapon.png");
+	bullet.setTexture(&projectilespic);
+	std::vector<RectangleShape> bullet1;
+	bullet1.push_back(RectangleShape(bullet));//วาดกระสุน ปิ๊วๆ
 	
 
 	/////////////////////////////////Auto run background/////////////////////////////////
@@ -145,11 +191,9 @@ int main()
 				else if (quit.getGlobalBounds(window)) {
 					game = 3;
 				}
-				/*else if (play.getGlobalBounds(window)) {
-					game = 0;
-				}*/
 			}
 		}
+
 		//score ติดย้อนกลับ
 		while (game == 2)
 		{
@@ -167,23 +211,6 @@ int main()
 				game = 0;
 			}
 		}
-
-		/*while (game == 3)
-		{
-			score.Draw(window);
-			back.Draw(window);
-			window.display();
-			if (back.getGlobalBounds(window)) {
-				back.setScale(sf::Vector2f(0.7f, 0.7f));
-			}
-			else {
-				back.setScale(sf::Vector2f(0.6f, 0.6f));
-			}
-			if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && back.getGlobalBounds(window))
-			{
-				game = 0;
-			}
-		}*/
 
 		//quit
 		while (game == 3)
@@ -214,22 +241,69 @@ int main()
 				}
 
 			}
-
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
 			{
 				game = 0;
 			}
-
-
-
-
-			//ล็อคฉากไม่ให้เลื่อนเกินขอบซ้าย
-			if (player.GetPosition().x >= 900 && player.GetPosition().x <= 6223)
+			//Update
+			//player shoot
+			playerCenter = Vector2f(player.GetPosition().x - 15, player.GetPosition().y + 10);
+			
+			
+			//bullet
+			if (shootTimer < 5)
+				shootTimer++;
+			if (Keyboard::isKeyPressed(Keyboard::E) && shootTimer >= 5) //กดยิงงง
 			{
-				/*view.setCenter(player.GetPosition().x, 540);*/
-				player.GetPosition().x, 540;
+				bullet.setPosition(playerCenter);
+				bullet1.push_back(RectangleShape(bullet));
+				shootTimer = 0;
+			}
+			
+			for (size_t i = 0; i < bullet1.size(); i++)
+			{
+				bullet1[i].move(15.f, 0.f);
+
+				if (bullet1[i].getPosition().x <= 15)
+					bullet1.erase(bullet1.begin() + i);
+			}
+			//enemy
+			if(enemySpawnTimer < 15)
+				enemySpawnTimer++;
+			//แก้เป็นแกน x ฝั่งขวา + อห
+			if (enemySpawnTimer >= 15)
+			{
+				enemy1.setPosition(0.f, (rand() % int(window.getSize().y - enemy1.getSize().y)));
+				enemies1.push_back(RectangleShape(enemy1));
+				enemySpawnTimer = 0;
 			}
 
+			for (size_t i = 0; i < enemies1.size(); i++)
+			{
+				enemies1[i].move(5.f, 0.f);
+
+				/*if (enemies1[i].getPosition().x > window.getSize().x);
+					enemies1.erase(enemies1.begin() + i);*/
+			}
+			//Collision
+			if (!enemies1.empty() && !bullet1.empty())
+			{
+				for (size_t i = 0; i < bullet1.size(); i++)
+				{
+					for (size_t k = 0; k < enemies1.size(); k++)
+					{
+						if (bullet1[i].getGlobalBounds().intersects(enemies1[k].getGlobalBounds()))
+						{
+							bullet1.erase(bullet1.begin() + i);
+							enemies1.erase(enemies1.begin() + k);
+							break;
+						}
+					}
+				}
+			}
+			
+
+			//////////////////////////////////////////////////////////////////////////////////////////
 
 			player.Update(deltaTime);
 
@@ -248,6 +322,12 @@ int main()
 
 				}
 
+			
+			
+
+			
+
+
 
 			//updateพื้นหลังรันเรื่อยๆ
 
@@ -256,13 +336,15 @@ int main()
 
 
 
-
-
+			/////////////////////////////////Draw or Render/////////////////////////////////
 			window.clear();
+			
+
 
 			/*window.setView(view);*/
 			window.draw(bg[0]);
 			window.draw(bg[1]);
+
 
 			//วาดฉากเลื่อน
 			for (Background& background : backgrounds)
@@ -270,12 +352,32 @@ int main()
 
 			player.Draw(window);
 
+			///////////////////////////////// Draw shoots & enemies1 /////////////////////////////////
+			for (size_t i = 0; i < enemies1.size(); i++)
+			{
+				window.draw(enemies1[i]);
+			}
+			for (size_t i = 0; i < bullet1.size(); i++)
+			{
+				window.draw(bullet1[i]);
+			}
+
+			//////////////////////////////////////////////////////////////////////////////////////////
+
+			//ล็อคฉากไม่ให้เลื่อนเกินขอบซ้าย
+			if (player.GetPosition().x >= 900 && player.GetPosition().x <= 6223)
+			{
+				/*view.setCenter(player.GetPosition().x, 540);*/
+				player.GetPosition().x, 540;
+			}
+
 			for (Platform& platform : platforms)
 				platform.Draw(window);
 
+			
+
 			window.display();
 
-			
 		}
 
 		return 0;
