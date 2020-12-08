@@ -78,7 +78,7 @@ int main()
 	/////////////////////////////////Player/////////////////////////////////
 	//player
 	sf::Texture playerTexture;
-	playerTexture.loadFromFile("Resource/Sprite/playerkeroro.png");	
+	playerTexture.loadFromFile("Resource/Sprite/playergiroro.png");	
 
 	Player player(&playerTexture, sf::Vector2u(5, 6), 0.3f, 400.0f, 170.0f);
 
@@ -98,6 +98,8 @@ int main()
 	enemies1.push_back(RectangleShape(enemy1)); //วาดมอน1
 
 	int enemySpawnTimer = 0;
+	sf::Clock Itemclock;
+	float ItemDelay = Itemclock.getElapsedTime().asSeconds();
 
 	/*sf::RectangleShape enemy2(sf::Vector2f(60.0f, 80.f));
 	sf::Texture enemy2pic;
@@ -147,15 +149,8 @@ int main()
 
 		while (game == 0)
 		{
-			while (window.pollEvent(evnt))
-			{
-				switch (evnt.type)
-				{
-				case sf::Event::Closed:
-					window.close();
-					break;
-				}
-			}
+			
+			
 			//วาดหน้าเมนู
 			bgmenu.Draw(window);
 			start.Draw(window);
@@ -224,43 +219,32 @@ int main()
 		//start
 		while (game == 1)
 		{
-			deltaTime = clock.restart().asSeconds();
-			if (deltaTime > 1.0f / 20.0f)
-				deltaTime = 1.0f / 20.0f;
-
-			while (window.pollEvent(evnt))
-			{
-				switch (evnt.type)
-				{
-				case sf::Event::Closed:
-					window.close();
-					break;
-					/*case sf::Event::Resized:
-						ResizeView(window, view);
-						break;*/
-				}
-
-			}
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
 			{
 				game = 0;
 			}
+			deltaTime = clock.restart().asSeconds();
+			if (deltaTime > 1.0f / 20.0f)
+				deltaTime = 1.0f / 20.0f;
+
+
+
 			//Update
 			//player shoot
 			playerCenter = Vector2f(player.GetPosition().x - 15, player.GetPosition().y + 10);
-			
-			
+
+
 			//bullet
-			if (shootTimer < 5)
+			if (shootTimer < 30)
 				shootTimer++;
-			if (Keyboard::isKeyPressed(Keyboard::E) && shootTimer >= 5) //กดยิงงง
+			if (Keyboard::isKeyPressed(Keyboard::E) && shootTimer >= 30) //กดยิงงง
 			{
 				bullet.setPosition(playerCenter);
 				bullet1.push_back(RectangleShape(bullet));
 				shootTimer = 0;
 			}
-			
-			for (size_t i = 0; i < bullet1.size(); i++)
+
+			for (size_t i = 1; i < bullet1.size(); i++)
 			{
 				bullet1[i].move(15.f, 0.f);
 
@@ -268,19 +252,21 @@ int main()
 					bullet1.erase(bullet1.begin() + i);
 			}
 			//enemy
-			if(enemySpawnTimer < 15)
+			if (enemySpawnTimer < 15)
+			{
 				enemySpawnTimer++;
-			//แก้เป็นแกน x ฝั่งขวา + อห
-			if (enemySpawnTimer >= 15)
-			{
-				enemy1.setPosition(0.f, (rand() % int(window.getSize().y - enemy1.getSize().y)));
-				enemies1.push_back(RectangleShape(enemy1));
-				enemySpawnTimer = 0;
 			}
-
-			for (size_t i = 0; i < enemies1.size(); i++)
+				
+				if (enemySpawnTimer >= 100)
+				{
+					enemy1.setPosition(Vector2f(2000, 470));
+					enemies1.push_back(RectangleShape(enemy1));
+					enemySpawnTimer = 0;
+				}
+				enemySpawnTimer++;
+			for (size_t i = 1; i < enemies1.size(); i++)
 			{
-				enemies1[i].move(5.f, 0.f);
+				enemies1[i].move(-5.f, 0.f);
 
 				/*if (enemies1[i].getPosition().x > window.getSize().x);
 					enemies1.erase(enemies1.begin() + i);*/
@@ -288,9 +274,9 @@ int main()
 			//Collision
 			if (!enemies1.empty() && !bullet1.empty())
 			{
-				for (size_t i = 0; i < bullet1.size(); i++)
+				for (size_t i = 1; i < bullet1.size(); i++)
 				{
-					for (size_t k = 0; k < enemies1.size(); k++)
+					for (size_t k = 1; k < enemies1.size(); k++)
 					{
 						if (bullet1[i].getGlobalBounds().intersects(enemies1[k].getGlobalBounds()))
 						{
@@ -353,11 +339,11 @@ int main()
 			player.Draw(window);
 
 			///////////////////////////////// Draw shoots & enemies1 /////////////////////////////////
-			for (size_t i = 0; i < enemies1.size(); i++)
+			for (size_t i = 1; i < enemies1.size(); i++)
 			{
 				window.draw(enemies1[i]);
 			}
-			for (size_t i = 0; i < bullet1.size(); i++)
+			for (size_t i = 1; i < bullet1.size(); i++)
 			{
 				window.draw(bullet1[i]);
 			}

@@ -25,6 +25,7 @@ private:
 	unsigned int row;
 	float speed;
 	bool faceRight;
+	
 
 	sf::Vector2f velocity;
 	bool canJump;

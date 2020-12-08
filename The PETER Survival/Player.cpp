@@ -8,7 +8,7 @@ Player::Player(sf::Texture* texture, sf::Vector2u imageCount, float switchTime, 
 	row = 0;
 	faceRight = true;
 
-	body.setSize(sf::Vector2f(110.0f, 120.0f)); //¡ÇéÒ§ÊÙ§µÑÇàÅè¹
+	body.setSize(sf::Vector2f(110.0f, 120.0f)); //เซ็ตตัว player
 	body.setOrigin(body.getSize() / 2.0f);
 	body.setPosition(350.0f, 500.0f);
 
@@ -29,15 +29,15 @@ void Player::Update(float deltaTime)
 			velocity.x -= speed;
 		}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-		if (body.getPosition().x < 1870.0f)
+		if (body.getPosition().x < 900.0f)
 		{
 			velocity.x += speed;
 		}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) //»ØèÁâ¨ÁµÕ
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) 
 	{
-
+		
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && canJump)
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && canJump)
 		if (body.getPosition().y > 450.0f)
 		{
 			canJump = false;
@@ -47,10 +47,6 @@ void Player::Update(float deltaTime)
 
 		}
 	canJump = true;
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
-	{
-
-	}
 
 
 
@@ -63,10 +59,10 @@ void Player::Update(float deltaTime)
 	{
 		row = 0;
 	}
+	
 	else
 	{
 		row = 1;
-
 		if (velocity.x > 0.0f)
 			faceRight = true;
 		else
