@@ -83,7 +83,12 @@ int main()
 	quitTexture.loadFromFile("Resource/Menu/quit.png");
 	sf::Texture backTexture;
 	backTexture.loadFromFile("Resource/Menu/back.png");
-	//Score
+	sf::Texture backtomenuTexture;
+	backtomenuTexture.loadFromFile("Resource/Menu/backtomenu.png");
+	//bg Gameover
+	sf::Texture bggameoverTexture;
+	bggameoverTexture.loadFromFile("Resource/Menu/gameover.png");
+	//bg Score
 	sf::Texture bgscoreTexture;
 	bgscoreTexture.loadFromFile("Resource/Score/scorebg.png");
 
@@ -93,6 +98,8 @@ int main()
 	Menu score(&scoreTexture, sf::Vector2f(0.5f , 0.5f), sf::Vector2f(720.0f , 500.0f));
 	Menu quit(&quitTexture, sf::Vector2f(0.5f , 0.5f), sf::Vector2f(720.0f, 650.0f));
 	Menu back(&backTexture, sf::Vector2f(0.3f, 0.3f), sf::Vector2f(1500.0f, 900.0f));
+	Menu backtomenu(&backtomenuTexture, sf::Vector2f(0.3f, 0.3f), sf::Vector2f(710.0f, 900.0f));
+	Menu bggameover(&bggameoverTexture, sf::Vector2f(1.0f, 1.0f), sf::Vector2f(0.0f, 0.0f));
 
 	
 
@@ -253,6 +260,28 @@ int main()
 			window.close();
 		}
 
+		//game over
+		while (game == 4)
+		{
+			bggameover.Draw(window);
+			backtomenu.Draw(window);
+			window.display();
+			if (backtomenu.getGlobalBounds(window)) {
+				backtomenu.setScale(sf::Vector2f(0.5f, 0.5f));
+			}
+			else {
+				backtomenu.setScale(sf::Vector2f(0.4f, 0.4f));
+			}
+			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+			{
+				if (backtomenu.getGlobalBounds(window)) {
+					game = 0;
+				}
+			}
+			
+		}
+
+
 		/////////////////////////////////////////////////////////////////////////
 
 	
@@ -342,7 +371,11 @@ int main()
 					if (hitagain == 5)
 					{
 						hpplay.loadFromFile("Resource/Hp/hp6.png");
+					}
+					if (hitagain == 6)
+					{
 						//game over
+						game = 4;
 					}
 					
 				}
@@ -400,7 +433,12 @@ int main()
 					if (hitagain == 5)
 					{
 						hpplay.loadFromFile("Resource/Hp/hp6.png");
+			
+					}
+					if (hitagain == 6)
+					{
 						//game over
+						game = 4;
 					}
 
 				}
