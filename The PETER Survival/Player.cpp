@@ -29,7 +29,7 @@ void Player::Update(float deltaTime)
 			velocity.x -= speed;
 		}
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-		if (body.getPosition().x < 900.0f)
+		if (body.getPosition().x < 1860.0f)
 		{
 			velocity.x += speed;
 		}

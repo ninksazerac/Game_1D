@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
+#include <algorithm>
 #include "Player.h"
 #include "Platform.h"
 #include "Background.h"
@@ -41,6 +42,19 @@ int main()
 	sf::Font word;
 	word.loadFromFile("Resource/Font/RobotoMono-BoldItalic.ttf");
 
+	/////////////////////////////////Hp/////////////////////////////////
+	//ประกาศตัวแปร
+	int hit = 0;
+	int hitagain = 0;
+	//เซ็ต hp
+	sf::RectangleShape hp(sf::Vector2f(280.0f, 60.f));
+	sf::Texture hpplay;
+	hpplay.loadFromFile("Resource/Hp/hp1.png");
+	hp.setTexture(&hpplay);
+	hp.setPosition(30, 30);
+
+
+	////////////////////////////Score
 	sf::Text scoreText;
 	scoreText.setPosition(1800, 40);
 	scoreText.setCharacterSize(50);
@@ -55,7 +69,7 @@ int main()
 	score1.setFillColor(sf::Color::White);
 	score1.setString("Score :");
 	
-
+	
 	
 
 	/////////////////////////////////Menu/////////////////////////////////
@@ -100,7 +114,7 @@ int main()
 	sf::Texture playerTexture;
 	playerTexture.loadFromFile("Resource/Sprite/playergiroro.png");	
 
-	Player player(&playerTexture, sf::Vector2u(5, 6), 0.3f, 400.0f, 170.0f);
+	Player player(&playerTexture, sf::Vector2u(5, 6), 0.3f, 400.0f, 200.0f);
 
 
 	/////////////////////////////////Jump/////////////////////////////////
@@ -116,7 +130,11 @@ int main()
 	std::vector<RectangleShape> enemies1;
 	enemies1.push_back(RectangleShape(enemy1)); //วาดมอน1
 
-	int enemySpawnTimer = 0;
+	int enemySpawnTimer1 = 0;
+	int enemySpawnTimer2 = 0;
+	int enemySpawnNext1 = 260;
+	int enemySpawnNext2 = 200;
+
 	sf::Clock enemyclock;
 	float enemyDelay = enemyclock.getElapsedTime().asSeconds();
 
@@ -132,15 +150,17 @@ int main()
 
 
 	/////////////////////////////////Bullet/////////////////////////////////
-	int shootTimer = 0;
+	int shootTimer1 = 0;
+	int shootTimer2 = 0;
+	//bullet1
+	sf::RectangleShape bullet1(sf::Vector2f(20.0f, 30.f));
+	sf::Texture projectilespic1;
+	projectilespic1.loadFromFile("Resource/Weapon/weapon.png");
+	bullet1.setTexture(&projectilespic1);
+	std::vector<RectangleShape> bullets1;
+	bullets1.push_back(RectangleShape(bullet1));//วาดกระสุน ปิ๊วๆ
 
-	sf::RectangleShape bullet(sf::Vector2f(30.0f, 40.f));
-	sf::Texture projectilespic;
-	projectilespic.loadFromFile("Resource/Weapon/weapon.png");
-	bullet.setTexture(&projectilespic);
-	std::vector<RectangleShape> bullet1;
-	bullet1.push_back(RectangleShape(bullet));//วาดกระสุน ปิ๊วๆ
-	
+
 
 	/////////////////////////////////Auto run background/////////////////////////////////
 	//พื้นหลังต่อไปเรื่อยๆ
@@ -254,44 +274,79 @@ int main()
 			playerCenter = Vector2f(player.GetPosition().x - 15, player.GetPosition().y + 10);
 
 
-			//bullet
-			if (shootTimer < 30)
-				shootTimer++;
-			if (Keyboard::isKeyPressed(Keyboard::E) && shootTimer >= 30) //กดยิงงง
+			//bullet1
+			if (shootTimer1 < 30)
+				shootTimer1++;
+			if (Keyboard::isKeyPressed(Keyboard::E) && shootTimer1 >= 30) //กดยิงงง
 			{
-				bullet.setPosition(playerCenter);
-				bullet1.push_back(RectangleShape(bullet));
-				shootTimer = 0;
+				bullet1.setPosition(playerCenter);
+				bullets1.push_back(RectangleShape(bullet1));
+				shootTimer1 = 0;
 			}
 
-			for (size_t i = 1; i < bullet1.size(); i++)
+			for (size_t i = 1; i < bullets1.size(); i++)
 			{
-				bullet1[i].move(15.f, 0.f);
+				bullets1[i].move(15.f, 0.f);
 
-				if (bullet1[i].getPosition().x <= 15)
-					bullet1.erase(bullet1.begin() + i);
+				if (bullets1[i].getPosition().x <= 15)
+					bullets1.erase(bullets1.begin() + i);
+				bullets1[i].move(-10.f, 0.f);
 			}
 
+			
 			//enemy
 			//mon 1
-			if (scoreCount <= 49)
+			//if (scoreCount <= 49)
 			{
-				if (enemySpawnTimer < 30)
+				if (enemySpawnTimer1 < 30)
 				{
-					enemySpawnTimer++;
+					enemySpawnTimer1++;
 				}
 
-				if (enemySpawnTimer >= 120)
+				if (enemySpawnTimer1 >= enemySpawnNext1)
 				{
 					enemy1.setPosition(Vector2f(2000, 470));
 					enemies1.push_back(RectangleShape(enemy1));
-					enemySpawnTimer = 0;
+					enemySpawnTimer1 = 0;
+					enemySpawnNext1 = 130 + rand() % 130;
 				}
-				enemySpawnTimer++;
+				enemySpawnTimer1++;
 			}
 			for (size_t i = 1; i < enemies1.size(); i++)
 			{
+				if (scoreCount >= 100) { enemies1[i].move(-1.5f, 0.0f); }
+				if (scoreCount >= 200) { enemies1[i].move(-3.0f, 0.0f); }
 				enemies1[i].move(-5.f, 0.f);
+				if (player.GetGlobal().intersects(enemies1[i].getGlobalBounds()))
+				{
+					enemies1.erase(enemies1.begin() + i);
+					//ชนแล้วเลือดลด
+					if (hit == 0)
+					{
+						hit++;
+						hitagain += hit;
+						hpplay.loadFromFile("Resource/Hp/hp2.png");
+					}
+					if (hitagain == 2)
+					{
+						hpplay.loadFromFile("Resource/Hp/hp3.png");
+					}
+					if (hitagain == 3)
+					{
+						hpplay.loadFromFile("Resource/Hp/hp4.png");
+					}
+					if (hitagain == 4)
+					{
+						hpplay.loadFromFile("Resource/Hp/hp5.png");
+					}
+					if (hitagain == 5)
+					{
+						hpplay.loadFromFile("Resource/Hp/hp6.png");
+						//game over
+					}
+					
+				}
+				
 
 
 				/*if (enemies1[i].getPosition().x > window.getSize().x);
@@ -301,23 +356,54 @@ int main()
 			//mon 2
 			if (scoreCount >= 50)
 			{
-				if (enemySpawnTimer < 50)
+				if (enemySpawnTimer2 < 50)
 				{
-					enemySpawnTimer++;
+					enemySpawnTimer2++;
 				}
 
-				if (enemySpawnTimer >= 70)
+				if (enemySpawnTimer2 >= enemySpawnNext2)
 				{
 					enemy2.setPosition(Vector2f(2000, 470));
 					enemies2.push_back(RectangleShape(enemy2));
-					enemySpawnTimer = 0;
+					enemySpawnTimer2 = 0;
+					enemySpawnNext2 = 100 + rand() % 100;
 				}
-				enemySpawnTimer++;
+				enemySpawnTimer2++;
 			}
 			for (size_t i = 1; i < enemies2.size(); i++)
 			{
+				if (scoreCount >= 150) { enemies2[i].move(-3.0f, 0.0f); }
+				if (scoreCount >= 200) { enemies2[i].move(-4.0f, 0.0f); }
 				enemies2[i].move(-5.f, 0.f);
-				
+				if (player.GetGlobal().intersects(enemies2[i].getGlobalBounds()))
+				{
+					enemies2.erase(enemies2.begin() + i);
+					//ชนแล้วเลือดลด
+					if (hit == 0)
+					{
+						hit++;
+						hitagain += hit;
+						hpplay.loadFromFile("Resource/Hp/hp2.png");
+					}
+					if (hitagain == 2)
+					{
+						hpplay.loadFromFile("Resource/Hp/hp3.png");
+					}
+					if (hitagain == 3)
+					{
+						hpplay.loadFromFile("Resource/Hp/hp4.png");
+					}
+					if (hitagain == 4)
+					{
+						hpplay.loadFromFile("Resource/Hp/hp5.png");
+					}
+					if (hitagain == 5)
+					{
+						hpplay.loadFromFile("Resource/Hp/hp6.png");
+						//game over
+					}
+
+				}
 
 				
 				/*if (enemies1[i].getPosition().x > window.getSize().x);
@@ -325,34 +411,37 @@ int main()
 			}
 
 			//Collision
-			//mon 1
-				for (size_t i = 1; i < bullet1.size(); i++)
+			//mon 1 b.1
+				for (size_t i = 1; i < bullets1.size(); i++)
 				{
 					for (size_t k = 1; k < enemies1.size(); k++)
 					{
-						if (bullet1[i].getGlobalBounds().intersects(enemies1[k].getGlobalBounds()))
+						if (bullets1[i].getGlobalBounds().intersects(enemies1[k].getGlobalBounds()))
 						{
-							bullet1.erase(bullet1.begin() + i);
+							bullets1.erase(bullets1.begin() + i);
 							enemies1.erase(enemies1.begin() + k);
 							scoreCount += 5;
 							break;
 						}
 					}
 				}
-			//mon 2
-				for (size_t i = 1; i < bullet1.size(); i++)
+			//mon 2 b.2
+				for (size_t i = 1; i < bullets1.size(); i++)
 				{
 					for (size_t k = 1; k < enemies2.size(); k++)
 					{
-						if (bullet1[i].getGlobalBounds().intersects(enemies2[k].getGlobalBounds()))
+						if (bullets1[i].getGlobalBounds().intersects(enemies2[k].getGlobalBounds()))
 						{
-							bullet1.erase(bullet1.begin() + i);
+							bullets1.erase(bullets1.begin() + i);
 							enemies2.erase(enemies2.begin() + k);
 							scoreCount += 10;
 							break;
 						}
 					}
 				}
+
+				hit = 0;
+				
 
 
 			//////////////////////////////////////////////////////////////////////////////////////////
@@ -379,7 +468,7 @@ int main()
 
 			
 
-
+			
 
 			//updateพื้นหลังรันเรื่อยๆ
 
@@ -389,6 +478,8 @@ int main()
 
 
 			/////////////////////////////////Draw or Render/////////////////////////////////
+			
+
 			window.clear();
 			
 			
@@ -401,13 +492,15 @@ int main()
 			//วาดฉากเลื่อน
 			for (Background& background : backgrounds)
 				background.Draw(window);
-
+			//วาด hp
+			window.draw(hp);
 			player.Draw(window);
-
+				
 			//วาด score
 			scoreText.setString(to_string(scoreCount));
-			window.draw(score1);
+			window.draw(score1); 
 			window.draw(scoreText);
+			
 			///////////////////////////////// Draw shoots & enemies1 /////////////////////////////////
 			
 			
@@ -419,18 +512,22 @@ int main()
 			{
 				window.draw(enemies2[i]);
 			}
-			for (size_t i = 1; i < bullet1.size(); i++)
+			for (size_t i = 1; i < bullets1.size(); i++)
 			{
-				window.draw(bullet1[i]);
+				window.draw(bullets1[i]);
 			}
-
+			
 			//////////////////////////////////////////////////////////////////////////////////////////
 
 			//ล็อคฉากไม่ให้เลื่อนเกินขอบซ้าย
 			if (player.GetPosition().x >= 900 && player.GetPosition().x <= 6223)
 			{
-				/*view.setCenter(player.GetPosition().x, 540);*/
-				player.GetPosition().x, 540;
+				//view.setCenter(player.GetPosition().x, 540);
+				//player.GetPosition().x, 540;
+				sf::Vector2f pos = player.GetPosition();
+				pos.x = std::min(pos.x, 6223.0f);
+				pos.x = std::max(pos.x, 900.0f);
+				player.setPosition(pos);
 			}
 
 			for (Platform& platform : platforms)
@@ -442,6 +539,8 @@ int main()
 
 		}
 
-		return 0;
+		
 	}
+
+	return 0;
 }
