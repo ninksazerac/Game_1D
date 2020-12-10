@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdlib>
+#include <fstream>
 #include <algorithm>
 #include "Player.h"
 #include "Platform.h"
@@ -13,6 +14,55 @@ void ResizeView(const sf::RenderWindow& window, sf::View& view) //set display ให
 {
 	float aspectRatio = float(window.getSize().x) / float(window.getSize().y);
 	view.setSize(VIEW_HEIGHT * aspectRatio, VIEW_HEIGHT);
+}
+//save score ให้เอาไปไว้ในหน้า strat
+void savescore() 
+{
+	std::map<int, std::string, std::greater<int>> mapscore;
+
+	std::fstream file;
+	file.open("Resource/Score/score.txt");
+
+	for (auto itr = mapscore.begin(); itr != mapscore.end(); ++itr)
+	{
+		file << itr->first << "\n";//score
+		file << itr->second << "\n";//user
+	}
+	file.close();
+}
+//หน้า game over
+std::map<int, std::string> Load() 
+{
+	std::map<int, std::string> score;
+	std::fstream file;
+	file.open("Resource/Score/score.txt");
+
+	for (int i = 0; i < 5; ++i)
+	{
+		std::pair<int, std::string>data;
+		file >> data.first;
+		file >> data.second;
+		score.insert(data);
+	}
+	file.close();
+	return score;
+}
+//เอามาแสดงหน้าscore
+void displayscores()
+{
+	auto listscore = Load();
+	for (auto itr = listscore.begin(); itr != listscore.end(); ++itr)
+	{
+		std::string user = itr->second;
+		int score = itr->first;
+
+		/*displayname1(user, score);
+		displayname2(user, score);
+		displayname3(user, score);
+		displayname4(user, score);
+		displayname5(user, score);*/
+	}
+
 }
 
 using namespace sf;
@@ -167,7 +217,27 @@ int main()
 	std::vector<RectangleShape> bullets1;
 	bullets1.push_back(RectangleShape(bullet1));//วาดกระสุน ปิ๊วๆ
 
+	/////////////////////////////////Item/////////////////////////////////
+	sf::RectangleShape itemheart(sf::Vector2f(20.0f, 30.0f));
+	sf::Texture itemheartTexture;
+	itemheartTexture.loadFromFile("Resource/Item/itemheart.png");
+	itemheart.setTexture(&itemheartTexture);
+	itemheart.setPosition(1000, 450);
+	std::vector < RectangleShape> hearts;
+	hearts.push_back(RectangleShape(itemheart));
+	//
+	sf::Clock Itemclock;
+	sf::RectangleShape item(sf::Vector2f(20.0f, 30.0f));  // ของ monepic
+	sf::Texture allitem;
+	allitem.loadFromFile("Resource/Item/itemheart.png");
+	item.setTexture(&allitem);
+	item.setPosition({ 1000, 450 });
 
+	std::vector<RectangleShape> items; //items
+	items.push_back(RectangleShape(item));
+	float ItemDelay = Itemclock.getElapsedTime().asSeconds();
+	int itemSpawnTimer = 0;
+	int rand_item;
 
 	/////////////////////////////////Auto run background/////////////////////////////////
 	//พื้นหลังต่อไปเรื่อยๆ
@@ -263,6 +333,7 @@ int main()
 		//game over
 		while (game == 4)
 		{
+			
 			bggameover.Draw(window);
 			backtomenu.Draw(window);
 			window.display();
@@ -375,6 +446,7 @@ int main()
 					if (hitagain == 6)
 					{
 						//game over
+						
 						game = 4;
 					}
 					
@@ -479,7 +551,104 @@ int main()
 				}
 
 				hit = 0;
-				
+			/////////////////////////////////Item/////////////////////////////////
+
+			if (itemSpawnTimer > 10)
+			{
+				rand_item = rand() % 5; // สุ่มให้ไอเท็มเกิด
+
+				if (rand_item == 0) { allitem.loadFromFile("Resource/Item/itemheart.png"); }
+				if (rand_item == 1) { allitem.loadFromFile("Resource/Item/itemdead.png"); }
+				if (rand_item == 2) { allitem.loadFromFile("Resource/Item/itemscoreup.png"); }
+				if (rand_item == 3) { allitem.loadFromFile("Resource/Item/itemscoredown.png"); }
+
+			}
+			int rand_x = (rand() % 800 ) + 100;
+
+			if (itemSpawnTimer >= 20 && ItemDelay > 10)
+			{
+				item.setPosition(Vector2f(rand_x, 470.0f));
+				items.push_back(RectangleShape(item));//วาดไอเทม
+				itemSpawnTimer = 0;
+				ItemDelay = Itemclock.restart().asSeconds();
+
+			}
+
+			itemSpawnTimer++;
+			printf("%f\n", ItemDelay);
+
+			for (size_t d = 1; d < items.size(); d++)
+			{
+				items[d].move(-5.0f, 0.0f);
+
+				//if (items[d].getPosition().y > window.getSize().y)  // สปอน มอนให้เกิด
+				//{
+				//	items.erase(items.begin() + d);
+				//	break;
+				//}
+
+				if (player.GetGlobal().intersects(items[d].getGlobalBounds()))
+				{
+					items.erase(items.begin() + d);
+					// เก็บได้หัวใจ
+					if (rand_item == 0) 
+					{
+						
+						if (hitagain == 1) {
+							hpplay.loadFromFile("Resource/Hp/hp1.png");
+							hitagain--;
+						}
+
+						if (hitagain == 2) {   // เซ้ทการชนแล้วเลือดค่อยๆลด
+							hpplay.loadFromFile("Resource/Hp/hp2.png");
+							hitagain--;
+						}
+
+						if (hitagain == 3) {
+							hpplay.loadFromFile("Resource/Hp/hp3.png");
+							hitagain--;
+						}
+
+						if (hitagain == 4) {
+							hpplay.loadFromFile("Resource/Hp/hp4.png");
+							hitagain--;
+						}
+
+						if (hitagain == 5) {
+							hpplay.loadFromFile("Resource/Hp/hp5.png");
+							hitagain--;
+						}
+
+						if (hitagain == 6) {
+							hpplay.loadFromFile("Resource/Hp/hp6.png");
+							hitagain--;
+						}
+						if (hitagain == 7) {
+							game = 4;
+						}
+					}
+					// เก็บได้ dead  ตายเลย
+					if (rand_item == 1) {    
+						game = 4;
+
+					}
+					// เก็บได้ score++
+					if (rand_item == 2) {
+						scoreCount += 20;  
+					}
+					// เก็บได้ score--
+					if (rand_item == 3) {
+						scoreCount -= 10;  
+					}
+
+
+
+					ItemDelay = Itemclock.restart().asSeconds();
+					break;
+				}
+
+			}
+
 
 
 			//////////////////////////////////////////////////////////////////////////////////////////
@@ -540,8 +709,6 @@ int main()
 			window.draw(scoreText);
 			
 			///////////////////////////////// Draw shoots & enemies1 /////////////////////////////////
-			
-			
 			for (size_t i = 1; i < enemies1.size(); i++)
 			{
 				window.draw(enemies1[i]);
@@ -550,10 +717,15 @@ int main()
 			{
 				window.draw(enemies2[i]);
 			}
+			for (size_t d = 1; d < items.size(); d++)
+			{
+				window.draw(items[d]);
+			}
 			for (size_t i = 1; i < bullets1.size(); i++)
 			{
 				window.draw(bullets1[i]);
 			}
+			
 			
 			//////////////////////////////////////////////////////////////////////////////////////////
 
