@@ -37,7 +37,7 @@ void Player::Update(float deltaTime)
 	{
 		
 	}
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && canJump)
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::W) && canJump)
 		if (body.getPosition().y > 450.0f)
 		{
 			canJump = false;
@@ -54,6 +54,8 @@ void Player::Update(float deltaTime)
 
 	//velocity
 	velocity.y += 981.0f * deltaTime;
+	if (velocity.y > 2000)
+		velocity.y = 2000;
 
 	if (velocity.x == 0.0f)
 	{

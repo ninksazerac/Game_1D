@@ -1,4 +1,5 @@
 #include <SFML\Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 #include <vector>
 #include <cstdlib>
@@ -8,6 +9,12 @@
 #include "Platform.h"
 #include "Background.h"
 #include "Menu.h"
+#include "TextBox.h"
+
+int getRand(int min, int max) {
+	float f = rand() / (float)RAND_MAX;
+	return min + (max - min) * f;
+}
 
 static const float VIEW_HEIGHT = 900.0f;
 void ResizeView(const sf::RenderWindow& window, sf::View& view) //set display ให้คงที่เวลาขยาย หด
@@ -15,55 +22,56 @@ void ResizeView(const sf::RenderWindow& window, sf::View& view) //set display ให
 	float aspectRatio = float(window.getSize().x) / float(window.getSize().y);
 	view.setSize(VIEW_HEIGHT * aspectRatio, VIEW_HEIGHT);
 }
-//save score ให้เอาไปไว้ในหน้า strat
-void savescore() 
+
+static void SavePlayerData(const std::map<int, std::string, std::greater<int>>& data)
 {
-	std::map<int, std::string, std::greater<int>> mapscore;
+	std::ofstream file;//output file
+	file.open("score.dat");
 
-	std::fstream file;
-	file.open("Resource/Score/score.txt");
-
-	for (auto itr = mapscore.begin(); itr != mapscore.end(); ++itr)
+	if (!file.is_open()) return;
+	for (auto itr = data.begin(); itr != data.end(); ++itr)
 	{
-		file << itr->first << "\n";//score
-		file << itr->second << "\n";//user
+		file.write((char*)&itr->first, sizeof(int));//first คือ score
+
+		size_t strSize = itr->second.size();
+		file.write((char*)&strSize, sizeof(size_t));
+		file.write(itr->second.data(), strSize);
 	}
+
 	file.close();
 }
-//หน้า game over
-std::map<int, std::string> Load() 
+
+static std::map<int, std::string, std::greater<int>> LoadPlayerData()
 {
-	std::map<int, std::string> score;
-	std::fstream file;
-	file.open("Resource/Score/score.txt");
+	std::map<int, std::string, std::greater<int>> res;
 
-	for (int i = 0; i < 5; ++i)
+	std::ifstream file;//input file
+	file.open("score.dat");
+
+	if (!file.is_open()) return res;
+
+	while (!file.eof())
 	{
-		std::pair<int, std::string>data;
-		file >> data.first;
-		file >> data.second;
-		score.insert(data);
-	}
-	file.close();
-	return score;
-}
-//เอามาแสดงหน้าscore
-void displayscores()
-{
-	auto listscore = Load();
-	for (auto itr = listscore.begin(); itr != listscore.end(); ++itr)
-	{
-		std::string user = itr->second;
-		int score = itr->first;
+		std::pair<int, std::string> pair;
 
-		/*displayname1(user, score);
-		displayname2(user, score);
-		displayname3(user, score);
-		displayname4(user, score);
-		displayname5(user, score);*/
-	}
+		int score;
+		file.read((char*)&score, sizeof(int));
 
+		size_t strSize;
+		std::string userName;
+		file.read((char*)&strSize, sizeof(size_t));
+		userName.resize(strSize);
+
+		pair.first = score;
+		pair.second = userName;
+		res.insert(pair);
+	}
 }
+//bool game = true;
+struct Item {
+	sf::RectangleShape obj;
+	int type;
+};
 
 using namespace sf;
 using namespace std;
@@ -118,9 +126,59 @@ int main()
 	score1.setFont(word);
 	score1.setFillColor(sf::Color::White);
 	score1.setString("Score :");
+
+	Textbox textuser(15, Color::Black, false);
+	textuser.setFont(word);
+
+	/////////////////////////////////Sound/////////////////////////////////
+	sf::Music bgsound1;
+	if (!bgsound1.openFromFile("Resource/Sound/sound2.wav"))
+	{
+		printf("error1\n");
+	}
+	bgsound1.setVolume(10);
+	bgsound1.setLoop(true);
+	bgsound1.play();
 	
-	
-	
+
+	//click
+	sf::SoundBuffer soundclick;
+	soundclick.loadFromFile("Resource/Sound/click.wav");
+	sf::Sound soundclicks;
+	soundclicks.setVolume(50.f);
+	soundclicks.setBuffer(soundclick);
+
+
+	//ยิง
+	sf::SoundBuffer soundshoot;
+	soundshoot.loadFromFile("Resource/Sound/shoot.wav");
+	sf::Sound soundshoots;
+	soundshoots.setBuffer(soundshoot);
+
+	//hp up
+	sf::SoundBuffer soundhpup;
+	soundhpup.loadFromFile("Resource/Sound/hpup.wav");
+	sf::Sound soundhpups;
+	soundhpups.setBuffer(soundhpup);
+
+	//score up
+	sf::SoundBuffer soundscoreup;
+	soundscoreup.loadFromFile("Resource/Sound/scoreup.wav");
+	sf::Sound soundscoreups;
+	soundscoreups.setBuffer(soundscoreup);
+
+	//ชน + score down
+	sf::SoundBuffer soundscoredown;
+	soundscoredown.loadFromFile("Resource/Sound/colider+scoredown.wav");
+	sf::Sound soundscoredowns;
+	soundscoredowns.setBuffer(soundscoredown);
+
+	//game over
+	sf::SoundBuffer soundgameover;
+	soundgameover.loadFromFile("Resource/Sound/gameover.wav");
+	sf::Sound soundgameovers;
+	soundgameovers.setBuffer(soundgameover);
+
 
 	/////////////////////////////////Menu/////////////////////////////////
 	sf::Texture bgmenuTexture;
@@ -142,16 +200,16 @@ int main()
 	sf::Texture bgscoreTexture;
 	bgscoreTexture.loadFromFile("Resource/Score/scorebg.png");
 
-	Menu bgmenu(&bgmenuTexture, sf::Vector2f(1.0f , 1.0f), sf::Vector2f(0.0f , 0.0f));
+	Menu bgmenu(&bgmenuTexture, sf::Vector2f(1.0f, 1.0f), sf::Vector2f(0.0f, 0.0f));
 	Menu bgscore(&bgscoreTexture, sf::Vector2f(1.0f, 1.0f), sf::Vector2f(0.0f, 0.0f));
-	Menu start(&startTexture, sf::Vector2f(0.5f , 0.5f), sf::Vector2f(710.0f , 350.0f));
-	Menu score(&scoreTexture, sf::Vector2f(0.5f , 0.5f), sf::Vector2f(720.0f , 500.0f));
-	Menu quit(&quitTexture, sf::Vector2f(0.5f , 0.5f), sf::Vector2f(720.0f, 650.0f));
+	Menu start(&startTexture, sf::Vector2f(0.5f, 0.5f), sf::Vector2f(710.0f, 350.0f));
+	Menu score(&scoreTexture, sf::Vector2f(0.5f, 0.5f), sf::Vector2f(720.0f, 500.0f));
+	Menu quit(&quitTexture, sf::Vector2f(0.5f, 0.5f), sf::Vector2f(720.0f, 650.0f));
 	Menu back(&backTexture, sf::Vector2f(0.3f, 0.3f), sf::Vector2f(1500.0f, 900.0f));
 	Menu backtomenu(&backtomenuTexture, sf::Vector2f(0.3f, 0.3f), sf::Vector2f(710.0f, 900.0f));
 	Menu bggameover(&bggameoverTexture, sf::Vector2f(1.0f, 1.0f), sf::Vector2f(0.0f, 0.0f));
 
-	
+
 
 	/////////////////////////////////Background/////////////////////////////////
 	//พื้นหลัง
@@ -169,7 +227,7 @@ int main()
 	/////////////////////////////////Player/////////////////////////////////
 	//player
 	sf::Texture playerTexture;
-	playerTexture.loadFromFile("Resource/Sprite/playergiroro.png");	
+	playerTexture.loadFromFile("Resource/Sprite/playergiroro.png");
 
 	Player player(&playerTexture, sf::Vector2u(5, 6), 0.3f, 400.0f, 200.0f);
 
@@ -203,7 +261,7 @@ int main()
 	enemies2.push_back(RectangleShape(enemy2));
 
 	sf::Vector2f playerCenter;
-	
+
 
 
 	/////////////////////////////////Bullet/////////////////////////////////
@@ -218,26 +276,32 @@ int main()
 	bullets1.push_back(RectangleShape(bullet1));//วาดกระสุน ปิ๊วๆ
 
 	/////////////////////////////////Item/////////////////////////////////
-	sf::RectangleShape itemheart(sf::Vector2f(20.0f, 30.0f));
+	sf::RectangleShape itemheart(sf::Vector2f(50.0f, 50.0f));
 	sf::Texture itemheartTexture;
 	itemheartTexture.loadFromFile("Resource/Item/itemheart.png");
 	itemheart.setTexture(&itemheartTexture);
 	itemheart.setPosition(1000, 450);
-	std::vector < RectangleShape> hearts;
-	hearts.push_back(RectangleShape(itemheart));
 	//
 	sf::Clock Itemclock;
-	sf::RectangleShape item(sf::Vector2f(20.0f, 30.0f));  // ของ monepic
-	sf::Texture allitem;
-	allitem.loadFromFile("Resource/Item/itemheart.png");
-	item.setTexture(&allitem);
-	item.setPosition({ 1000, 450 });
 
-	std::vector<RectangleShape> items; //items
-	items.push_back(RectangleShape(item));
+	//sf::RectangleShape item(sf::Vector2f(20.0f, 30.0f));  // ของ monepic
+	sf::Texture textureItem1;
+	textureItem1.loadFromFile("Resource/Item/itemheart.png");
+	sf::Texture textureItem2;
+	textureItem2.loadFromFile("Resource/Item/itemdead.png");
+	sf::Texture textureItem3;
+	textureItem3.loadFromFile("Resource/Item/itemscoreup.png");
+	sf::Texture textureItem4;
+	textureItem4.loadFromFile("Resource/Item/itemscoredown.png");
+
+	//item.setTexture(&allitem);
+	//item.setPosition({ 1000, 450 });
+
+	std::vector<Item> items; //items
+	//items.push_back(RectangleShape(item));
+
 	float ItemDelay = Itemclock.getElapsedTime().asSeconds();
 	int itemSpawnTimer = 0;
-	int rand_item;
 
 	/////////////////////////////////Auto run background/////////////////////////////////
 	//พื้นหลังต่อไปเรื่อยๆ
@@ -251,29 +315,47 @@ int main()
 	platforms.push_back(Platform(nullptr, sf::Vector2f(2500.0f, 200.0f), sf::Vector2f(900.0f, 650.f)));
 	/*platforms.push_back(Platform(nullptr, sf::Vector2f(2500.0f, 20.0f), sf::Vector2f(900.0f, 0.f)));*/
 	/*platforms.push_back(Platform(nullptr, sf::Vector2f(1000.0f, 200.0f), sf::Vector2f(900.0f, 900.f)));*/
-	
-	
+
+
 
 
 	float deltaTime = 0.0f;
 	sf::Clock clock;
 
-	
+	auto _Refresh = [&]() {
+		{
+			sf::Event event;
+			while (window.pollEvent(event))
+			{
+				if (event.type == sf::Event::Closed) {
+					window.close();
+					break;
+				}
+				/*if (event.type == sf::Event::TextEntered) {
+					if (event.text.unicode < 128)
+					{
+						std::map<int, std::string, std::greater<int>>& data
+					}
+				}*/
+			}
+		}
+		window.clear();
+	};
 
 	//เปิดเกมมา
 	while (window.isOpen())
 	{
-
 		while (game == 0)
 		{
-			
-			
+			_Refresh();
+
 			//วาดหน้าเมนู
+			/*bgsound1.play();*/
 			bgmenu.Draw(window);
 			start.Draw(window);
 			score.Draw(window);
 			quit.Draw(window);
-			window.display();
+
 			if (start.getGlobalBounds(window)) {
 				start.setScale(sf::Vector2f(0.6f, 0.6f));
 			}
@@ -295,23 +377,44 @@ int main()
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 			{
 				if (start.getGlobalBounds(window)) {
+					soundclicks.play();
 					game = 1;
+
+					scoreCount = 0;
+
+					enemies1.clear();
+					enemies2.clear();
+					bullets1.clear();
+					items.clear();
+
+					hit = 0;
+					hitagain = 0;
+					hpplay.loadFromFile("Resource/Hp/hp1.png");
+					hp.setTexture(&hpplay);
+
+					player = Player(&playerTexture, sf::Vector2u(5, 6), 0.3f, 400.0f, 200.0f);
 				}
 				else if (score.getGlobalBounds(window)) {
+					soundclicks.play();
 					game = 2;
 				}
 				else if (quit.getGlobalBounds(window)) {
+					soundclicks.play();
 					game = 3;
 				}
 			}
+
+			window.display();
 		}
 
-		//score ติดย้อนกลับ
+		//score 
 		while (game == 2)
 		{
+			_Refresh();
+			/*bgsound.pause();*/
 			bgscore.Draw(window);
 			back.Draw(window);
-			window.display();
+
 			if (back.getGlobalBounds(window)) {
 				back.setScale(sf::Vector2f(0.4f, 0.4f));
 			}
@@ -320,47 +423,60 @@ int main()
 			}
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && back.getGlobalBounds(window))
 			{
+				soundclicks.play();
+				
 				game = 0;
 			}
+
+			window.display();
 		}
 
 		//quit
-		while (game == 3)
+		if (game == 3)
 		{
 			window.close();
 		}
 
 		//game over
+
 		while (game == 4)
 		{
+			_Refresh();
 			
 			bggameover.Draw(window);
 			backtomenu.Draw(window);
-			window.display();
+
 			if (backtomenu.getGlobalBounds(window)) {
 				backtomenu.setScale(sf::Vector2f(0.5f, 0.5f));
 			}
 			else {
 				backtomenu.setScale(sf::Vector2f(0.4f, 0.4f));
 			}
+
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 			{
 				if (backtomenu.getGlobalBounds(window)) {
 					game = 0;
 				}
 			}
-			
+
+
+			window.display();
 		}
 
 
 		/////////////////////////////////////////////////////////////////////////
 
-	
+
 		//start
 		while (game == 1)
 		{
+			
+			_Refresh();
+			/*bgsound2.play();*/
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
 			{
+				soundclicks.play();
 				game = 0;
 			}
 			deltaTime = clock.restart().asSeconds();
@@ -372,19 +488,24 @@ int main()
 			//Update
 			//player shoot
 			playerCenter = Vector2f(player.GetPosition().x - 15, player.GetPosition().y + 10);
-
+			
 
 			//bullet1
 			if (shootTimer1 < 30)
 				shootTimer1++;
-			if (Keyboard::isKeyPressed(Keyboard::E) && shootTimer1 >= 30) //กดยิงงง
+			if (Keyboard::isKeyPressed(Keyboard::Space) && shootTimer1 >= 30) //กดยิงงง
 			{
-				bullet1.setPosition(playerCenter);
-				bullets1.push_back(RectangleShape(bullet1));
-				shootTimer1 = 0;
+				soundclicks.play();
+				if (bullets1.size() <= 5) {
+					bullet1.setPosition(playerCenter);
+					bullets1.push_back(RectangleShape(bullet1));
+					
+					shootTimer1 = 0;
+					
+				}
 			}
 
-			for (size_t i = 1; i < bullets1.size(); i++)
+			for (size_t i = 0; i < bullets1.size(); i++)
 			{
 				bullets1[i].move(15.f, 0.f);
 
@@ -393,7 +514,7 @@ int main()
 				bullets1[i].move(-10.f, 0.f);
 			}
 
-			
+
 			//enemy
 			//mon 1
 			//if (scoreCount <= 49)
@@ -408,11 +529,11 @@ int main()
 					enemy1.setPosition(Vector2f(2000, 470));
 					enemies1.push_back(RectangleShape(enemy1));
 					enemySpawnTimer1 = 0;
-					enemySpawnNext1 = 130 + rand() % 130;
+					enemySpawnNext1 = getRand(130, 260);
 				}
 				enemySpawnTimer1++;
 			}
-			for (size_t i = 1; i < enemies1.size(); i++)
+			for (size_t i = 0; i < enemies1.size(); i++)
 			{
 				if (scoreCount >= 100) { enemies1[i].move(-1.5f, 0.0f); }
 				if (scoreCount >= 200) { enemies1[i].move(-3.0f, 0.0f); }
@@ -420,6 +541,7 @@ int main()
 				if (player.GetGlobal().intersects(enemies1[i].getGlobalBounds()))
 				{
 					enemies1.erase(enemies1.begin() + i);
+					soundscoredowns.play();
 					//ชนแล้วเลือดลด
 					if (hit == 0)
 					{
@@ -446,12 +568,13 @@ int main()
 					if (hitagain == 6)
 					{
 						//game over
-						
+
 						game = 4;
+						soundgameovers.play();
 					}
-					
+
 				}
-				
+
 
 
 				/*if (enemies1[i].getPosition().x > window.getSize().x);
@@ -475,7 +598,7 @@ int main()
 				}
 				enemySpawnTimer2++;
 			}
-			for (size_t i = 1; i < enemies2.size(); i++)
+			for (size_t i = 0; i < enemies2.size(); i++)
 			{
 				if (scoreCount >= 150) { enemies2[i].move(-3.0f, 0.0f); }
 				if (scoreCount >= 200) { enemies2[i].move(-4.0f, 0.0f); }
@@ -483,6 +606,7 @@ int main()
 				if (player.GetGlobal().intersects(enemies2[i].getGlobalBounds()))
 				{
 					enemies2.erase(enemies2.begin() + i);
+					soundscoredowns.play();
 					//ชนแล้วเลือดลด
 					if (hit == 0)
 					{
@@ -505,81 +629,93 @@ int main()
 					if (hitagain == 5)
 					{
 						hpplay.loadFromFile("Resource/Hp/hp6.png");
-			
+
 					}
 					if (hitagain == 6)
 					{
 						//game over
 						game = 4;
+						soundgameovers.play();
+						
 					}
 
 				}
 
-				
+
 				/*if (enemies1[i].getPosition().x > window.getSize().x);
 					enemies1.erase(enemies1.begin() + i);*/
 			}
 
 			//Collision
 			//mon 1 b.1
-				for (size_t i = 1; i < bullets1.size(); i++)
+			for (size_t i = 0; i < bullets1.size(); i++)
+			{
+				for (size_t k = 0; k < enemies1.size(); k++)
 				{
-					for (size_t k = 1; k < enemies1.size(); k++)
+					if (bullets1[i].getGlobalBounds().intersects(enemies1[k].getGlobalBounds()))
 					{
-						if (bullets1[i].getGlobalBounds().intersects(enemies1[k].getGlobalBounds()))
-						{
-							bullets1.erase(bullets1.begin() + i);
-							enemies1.erase(enemies1.begin() + k);
-							scoreCount += 5;
-							break;
-						}
-					}
-				}
-			//mon 2 b.2
-				for (size_t i = 1; i < bullets1.size(); i++)
-				{
-					for (size_t k = 1; k < enemies2.size(); k++)
-					{
-						if (bullets1[i].getGlobalBounds().intersects(enemies2[k].getGlobalBounds()))
-						{
-							bullets1.erase(bullets1.begin() + i);
-							enemies2.erase(enemies2.begin() + k);
-							scoreCount += 10;
-							break;
-						}
-					}
-				}
+						soundclicks.play();
+						bullets1.erase(bullets1.begin() + i);
+						enemies1.erase(enemies1.begin() + k);
+						scoreCount += 5;
 
-				hit = 0;
+						break;
+					}
+				}
+			}
+			//mon 2 b.2
+			for (size_t i = 0; i < bullets1.size(); i++)
+			{
+				for (size_t k = 0; k < enemies2.size(); k++)
+				{
+					if (bullets1[i].getGlobalBounds().intersects(enemies2[k].getGlobalBounds()))
+					{
+						soundclicks.play();
+						bullets1.erase(bullets1.begin() + i);
+						enemies2.erase(enemies2.begin() + k);
+						scoreCount += 10;
+
+						break;
+					}
+				}
+			}
+
+			hit = 0;
 			/////////////////////////////////Item/////////////////////////////////
 
-			if (itemSpawnTimer > 10)
+			if (itemSpawnTimer >= 10 *60) //10 120
 			{
-				rand_item = rand() % 5; // สุ่มให้ไอเท็มเกิด
+				int rand_x = getRand(1490, 1920);
 
-				if (rand_item == 0) { allitem.loadFromFile("Resource/Item/itemheart.png"); }
-				if (rand_item == 1) { allitem.loadFromFile("Resource/Item/itemdead.png"); }
-				if (rand_item == 2) { allitem.loadFromFile("Resource/Item/itemscoreup.png"); }
-				if (rand_item == 3) { allitem.loadFromFile("Resource/Item/itemscoredown.png"); }
+				sf::Texture* pTexture = &textureItem1;
+				float scale = 1;
 
-			}
-			int rand_x = (rand() % 800 ) + 100;
+				int rand_item = rand() % 5; // สุ่มให้ไอเท็มเกิด
+				if (rand_item == 0) { pTexture = &textureItem1; scale = 1; }
+				else if (rand_item == 1) { pTexture = &textureItem2; }
+				else if (rand_item == 2) { pTexture = &textureItem3; scale = 1; }
+				else if (rand_item == 3) { pTexture = &textureItem4; }
 
-			if (itemSpawnTimer >= 20 && ItemDelay > 10)
-			{
-				item.setPosition(Vector2f(rand_x, 470.0f));
-				items.push_back(RectangleShape(item));//วาดไอเทม
+				Item newItem;
+				newItem.obj = RectangleShape(sf::Vector2f(50.0f, 50.0f));
+				newItem.type = rand_item;
+
+				newItem.obj.setTexture(pTexture);
+				newItem.obj.setPosition(Vector2f(rand_x, 470.0f));
+				newItem.obj.setScale(scale, scale);
+				items.push_back(newItem);//วาดไอเทม
+
 				itemSpawnTimer = 0;
 				ItemDelay = Itemclock.restart().asSeconds();
 
 			}
 
 			itemSpawnTimer++;
-			printf("%f\n", ItemDelay);
+			//std::printf("%f\n", ItemDelay);
 
-			for (size_t d = 1; d < items.size(); d++)
+			for (size_t d = 0; d < items.size(); d++)
 			{
-				items[d].move(-5.0f, 0.0f);
+				items[d].obj.move(-5.0f, 0.0f);
 
 				//if (items[d].getPosition().y > window.getSize().y)  // สปอน มอนให้เกิด
 				//{
@@ -587,12 +723,13 @@ int main()
 				//	break;
 				//}
 
-				if (player.GetGlobal().intersects(items[d].getGlobalBounds()))
+				if (player.GetGlobal().intersects(items[d].obj.getGlobalBounds()))
 				{
-					items.erase(items.begin() + d);
+					
 					// เก็บได้หัวใจ
-					if (rand_item == 0) 
+					if (items[d].type == 0)
 					{
+						soundhpups.play();
 						
 						if (hitagain == 1) {
 							hpplay.loadFromFile("Resource/Hp/hp1.png");
@@ -625,23 +762,26 @@ int main()
 						}
 						if (hitagain == 7) {
 							game = 4;
+							soundgameovers.play();
 						}
 					}
 					// เก็บได้ dead  ตายเลย
-					if (rand_item == 1) {    
+					if (items[d].type == 1) {
 						game = 4;
-
+						soundgameovers.play();
 					}
 					// เก็บได้ score++
-					if (rand_item == 2) {
-						scoreCount += 20;  
+					if (items[d].type == 2) {
+						scoreCount += 20;
+						soundscoreups.play();
 					}
 					// เก็บได้ score--
-					if (rand_item == 3) {
-						scoreCount -= 10;  
+					if (items[d].type == 3) {
+						scoreCount -= 10;
+						soundscoredowns.play();
 					}
 
-
+					items.erase(items.begin() + d);
 
 					ItemDelay = Itemclock.restart().asSeconds();
 					break;
@@ -670,12 +810,12 @@ int main()
 
 				}
 
-			
-			
 
-			
 
-			
+
+
+
+
 
 			//updateพื้นหลังรันเรื่อยๆ
 
@@ -685,11 +825,7 @@ int main()
 
 
 			/////////////////////////////////Draw or Render/////////////////////////////////
-			
 
-			window.clear();
-			
-			
 
 			/*window.setView(view);*/
 			window.draw(bg[0]);
@@ -702,31 +838,33 @@ int main()
 			//วาด hp
 			window.draw(hp);
 			player.Draw(window);
-				
+
 			//วาด score
 			scoreText.setString(to_string(scoreCount));
-			window.draw(score1); 
+
+			std::map<int, std::string, std::greater<int>> scoreCount;
+			window.draw(score1);
 			window.draw(scoreText);
-			
+
 			///////////////////////////////// Draw shoots & enemies1 /////////////////////////////////
-			for (size_t i = 1; i < enemies1.size(); i++)
+			for (size_t i = 0; i < enemies1.size(); i++)
 			{
 				window.draw(enemies1[i]);
 			}
-			for (size_t i = 1; i < enemies2.size(); i++)
+			for (size_t i = 0; i < enemies2.size(); i++)
 			{
 				window.draw(enemies2[i]);
 			}
-			for (size_t d = 1; d < items.size(); d++)
+			for (size_t d = 0; d < items.size(); d++)
 			{
-				window.draw(items[d]);
+				window.draw(items[d].obj);
 			}
-			for (size_t i = 1; i < bullets1.size(); i++)
+			for (size_t i = 0; i < bullets1.size(); i++)
 			{
 				window.draw(bullets1[i]);
 			}
-			
-			
+
+
 			//////////////////////////////////////////////////////////////////////////////////////////
 
 			//ล็อคฉากไม่ให้เลื่อนเกินขอบซ้าย
@@ -739,18 +877,19 @@ int main()
 				pos.x = std::max(pos.x, 900.0f);
 				player.setPosition(pos);
 			}
+			if (player.GetPosition().y > 1080) {
+				sf::Vector2f pos = player.GetPosition();
+				pos.y = 1080;
+				player.setPosition(pos);
+			}
 
 			for (Platform& platform : platforms)
 				platform.Draw(window);
 
-			
-
 			window.display();
-
 		}
 
 		
 	}
-
 	return 0;
 }
