@@ -1,3 +1,4 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <SFML\Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
@@ -127,8 +128,64 @@ int main()
 	score1.setFillColor(sf::Color::White);
 	score1.setString("Score :");
 
-	Textbox textuser(15, Color::Black, false);
-	textuser.setFont(word);
+	//////////////////////////// username , score
+
+	sf::Text username;
+	username.setFont(word);
+	username.setCharacterSize(40);
+	username.setPosition(42, 570);
+
+	sf::Text scoreplayer;
+	scoreplayer.setFont(word);
+	scoreplayer.setCharacterSize(40);
+	scoreplayer.setPosition(400, 570);
+
+	//////////////////////////////// text name /////////////////////////////////////////
+
+	sf::Text usernames_all[5];
+	sf::Text scoreplayers_all[5];
+	//name
+	usernames_all[0].setFont(word);
+	usernames_all[0].setCharacterSize(40);
+	usernames_all[0].setPosition(125, 250);
+
+	usernames_all[1].setFont(word);
+	usernames_all[1].setCharacterSize(40);
+	usernames_all[1].setPosition(125, 350);
+
+	usernames_all[2].setFont(word);
+	usernames_all[2].setCharacterSize(40);
+	usernames_all[2].setPosition(125, 450);
+
+	usernames_all[3].setFont(word);
+	usernames_all[3].setCharacterSize(40);
+	usernames_all[3].setPosition(125, 550);
+
+	usernames_all[4].setFont(word);
+	usernames_all[4].setCharacterSize(40);
+	usernames_all[4].setPosition(125, 650);
+
+	// score
+	scoreplayers_all[0].setFont(word);
+	scoreplayers_all[0].setCharacterSize(40);
+	scoreplayers_all[0].setPosition(350, 250);
+
+	scoreplayers_all[1].setFont(word);
+	scoreplayers_all[1].setCharacterSize(40);
+	scoreplayers_all[1].setPosition(350, 350);
+
+	scoreplayers_all[2].setFont(word);
+	scoreplayers_all[2].setCharacterSize(40);
+	scoreplayers_all[2].setPosition(350, 450);
+
+	scoreplayers_all[3].setFont(word);
+	scoreplayers_all[3].setCharacterSize(40);
+	scoreplayers_all[3].setPosition(350, 550);
+
+	scoreplayers_all[4].setFont(word);
+	scoreplayers_all[4].setCharacterSize(40);
+	scoreplayers_all[4].setPosition(350, 650);
+
 
 	/////////////////////////////////Sound/////////////////////////////////
 	sf::Music bgsound1;
@@ -303,6 +360,35 @@ int main()
 	float ItemDelay = Itemclock.getElapsedTime().asSeconds();
 	int itemSpawnTimer = 0;
 
+	/////////////////////////////////input name/////////////////////////////
+	sf::RectangleShape input_name(sf::Vector2f(564.0f, 864.0f));
+	sf::Texture nameplayerinput;
+	nameplayerinput.loadFromFile("Resource/sprite/bglogin.png");
+	input_name.setTexture(&nameplayerinput);
+	input_name.setPosition({ 0,0 });  // ตำแหน่งวงกลม (x,y)
+
+
+	/////////////////////////////////Highscore/////////////////////////////////
+	std::vector<std::pair<int, std::string>> highScore;
+	FILE* file;
+	char temp[25];
+	std::string nameArr[6] = {};
+	int scoreArr[6] = {};
+	bool collectHS = false;        /// r คือ read file
+	file = fopen("score.dat", "r");
+	for (int i = 0; i < 5; i++) {
+		fscanf(file, "%s", temp);
+		nameArr[i] = temp;
+		fscanf(file, "%d", &scoreArr[i]);
+		highScore.push_back(std::make_pair(scoreArr[i], nameArr[i]));
+	}
+	fclose(file);
+
+	//ใส่ username
+	TextBox input(40, Color::White, &word, Vector2f(245.0f, 405.0f), true, true, 7);
+	string user_name;
+
+
 	/////////////////////////////////Auto run background/////////////////////////////////
 	//พื้นหลังต่อไปเรื่อยๆ
 	std::vector<Background> backgrounds; //ชื่อ backgrounds
@@ -378,7 +464,6 @@ int main()
 			{
 				if (start.getGlobalBounds(window)) {
 					soundclicks.play();
-					game = 1;
 
 					scoreCount = 0;
 
@@ -393,6 +478,7 @@ int main()
 					hp.setTexture(&hpplay);
 
 					player = Player(&playerTexture, sf::Vector2u(5, 6), 0.3f, 400.0f, 200.0f);
+					game = 5;
 				}
 				else if (score.getGlobalBounds(window)) {
 					soundclicks.play();
@@ -412,8 +498,20 @@ int main()
 		{
 			_Refresh();
 			/*bgsound.pause();*/
+			highScore.erase(highScore.begin(), highScore.end());
+			file = fopen("./name_player.txt", "r");
+			for (int i = 0; i < 5; i++) {
+				fscanf(file, "%s", temp);
+				nameArr[i] = temp;
+				fscanf(file, "%d", &scoreArr[i]);
+				highScore.push_back(std::make_pair(scoreArr[i], nameArr[i]));
+			}
+			fclose(file);
+
+
 			bgscore.Draw(window);
 			back.Draw(window);
+
 
 			if (back.getGlobalBounds(window)) {
 				back.setScale(sf::Vector2f(0.4f, 0.4f));
@@ -443,6 +541,36 @@ int main()
 		{
 			_Refresh();
 			
+			input.setSelected(true);
+			username.setString(user_name);   // เอาชื่อมาแสดง
+			scoreplayer.setString(to_string(scoreCount));   // เอา score มาแสดง
+
+
+			if (!collectHS) {  // เคสเก็บสกอกับชื่อ 
+				highScore.erase(highScore.begin(), highScore.end());
+				file = fopen("score.dat", "r");
+				for (int i = 0; i < 5; i++) {
+					fscanf(file, "%s", temp);
+					nameArr[i] = temp;
+					fscanf(file, "%d", &scoreArr[i]);
+					highScore.push_back(std::make_pair(scoreArr[i], nameArr[i]));
+				}
+				if (user_name == "") {
+					user_name = "-"; // กรณีไม่ใส่ชื่อ 
+				}
+				highScore.push_back(std::make_pair(scoreCount, user_name));  // เก็บค่าตัวเลข กับชื่อ player 
+				std::sort(highScore.begin(), highScore.end());   // เรียงค่าจาก น้อยไปมาก score
+				fclose(file);
+				file = fopen(".score.dat", "w");
+				char temp[26] = {};
+				for (int i = 5; i >= 1; i--) {
+					strcpy(temp, highScore[i].second.c_str());
+					fprintf(file, "%s %d\n", temp, highScore[i].first);
+				}
+				fclose(file);
+				collectHS = true;
+			}
+
 			bggameover.Draw(window);
 			backtomenu.Draw(window);
 
@@ -463,6 +591,47 @@ int main()
 
 			window.display();
 		}
+
+		//หน้า username
+		while (game == 5)
+		{
+			while (window.pollEvent(evnt))
+			{
+				if (evnt.type == Event::Closed) window.close();
+				if (evnt.type == Event::TextEntered) input.update(evnt);
+				if (evnt.type == Event::KeyPressed && evnt.key.code == Keyboard::Enter)
+				{
+					user_name = input.getInput();
+					collectHS = false;
+					input.setSelected(false);
+
+					game = 1;
+				}
+
+			}
+
+			window.draw(input_name);
+			input.draw(window);
+			back.Draw(window); // ปุ่มย้อนกลับ
+			window.display();
+			if (back.getGlobalBounds(window)) {
+				back.setScale(sf::Vector2f(0.5f, 0.5f));
+			}
+			else {
+				back.setScale(sf::Vector2f(0.6f, 0.6f));  // ให้ขนาดใหญ่ขึ้นเมื่อชี้
+			}
+			if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && back.getGlobalBounds(window))
+			{
+				game = 0;
+			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))   // หกแล้วไปหน้าเมนูเลย
+			{
+				game = 0;
+			}
+			cout << user_name << endl;
+		}
+
+
 
 
 		/////////////////////////////////////////////////////////////////////////
