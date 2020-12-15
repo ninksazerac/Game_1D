@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+Ôªø#define _CRT_SECURE_NO_WARNINGS
 #include <SFML\Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
@@ -31,7 +31,7 @@ void LoadHighscoreList(std::vector<std::pair<int, std::string>>* pListScore) {
 	char temp[25];
 	std::string nameArr[6];
 	int scoreArr[6];
-	bool collectHS = false;        /// r §◊Õ read file
+	bool collectHS = false;        /// r ‡∏Ñ‡∏∑‡∏≠ read file
 	file = fopen("score.dat", "r");
 	if (file) {
 		if (GetFileSize(file) > 0) {
@@ -47,7 +47,7 @@ void LoadHighscoreList(std::vector<std::pair<int, std::string>>* pListScore) {
 }
 
 static const float VIEW_HEIGHT = 900.0f;
-void ResizeView(const sf::RenderWindow& window, sf::View& view) //set display „ÀÈ§ß∑’Ë‡«≈“¢¬“¬ À¥
+void ResizeView(const sf::RenderWindow& window, sf::View& view) //set display ‡πÉ‡∏´‡πâ‡∏Ñ‡∏á‡∏ó‡∏µ‡πà‡πÄ‡∏ß‡∏•‡∏≤‡∏Ç‡∏¢‡∏≤‡∏¢ ‡∏´‡∏î
 {
 	float aspectRatio = float(window.getSize().x) / float(window.getSize().y);
 	view.setSize(VIEW_HEIGHT * aspectRatio, VIEW_HEIGHT);
@@ -61,7 +61,7 @@ static void SavePlayerData(const std::map<int, std::string, std::greater<int>>& 
 	if (!file.is_open()) return;
 	for (auto itr = data.begin(); itr != data.end(); ++itr)
 	{
-		file.write((char*)&itr->first, sizeof(int));//first §◊Õ score
+		file.write((char*)&itr->first, sizeof(int));//first ‡∏Ñ‡∏∑‡∏≠ score
 
 		size_t strSize = itr->second.size();
 		file.write((char*)&strSize, sizeof(size_t));
@@ -118,7 +118,7 @@ int main()
 	{
 		return -1;
 	}
-	window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());  // ‡´È∑ icon ‡°¡
+	window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());  // ‡πÄ‡∏ã‡πâ‡∏ó icon ‡πÄ‡∏Å‡∏°
 
 	////////////////////////////
 	int game = 0;
@@ -131,10 +131,10 @@ int main()
 	word.loadFromFile("Resource/Font/RobotoMono-BoldItalic.ttf");
 
 	/////////////////////////////////Hp/////////////////////////////////
-	//ª√–°“»µ—«·ª√
+	//‡∏õ‡∏£‡∏∞‡∏Å‡∏≤‡∏®‡∏ï‡∏±‡∏ß‡πÅ‡∏õ‡∏£
 	int hit = 0;
 	int hitagain = 0;
-	//‡´Áµ hp
+	//‡πÄ‡∏ã‡πá‡∏ï hp
 	sf::RectangleShape hp(sf::Vector2f(280.0f, 60.f));
 	sf::Texture hpplay;
 	hpplay.loadFromFile("Resource/Hp/hp1.png");
@@ -161,15 +161,15 @@ int main()
 
 	sf::Text username;
 	username.setFont(word);
-	username.setFillColor(sf::Color::Black);
-	username.setCharacterSize(40);
-	username.setPosition(42, 570);
+	username.setFillColor(sf::Color::White);
+	username.setCharacterSize(70);
+	username.setPosition(350, 650);
 
 	sf::Text scoreplayer;
 	scoreplayer.setFont(word);
-	scoreplayer.setFillColor(sf::Color::Black);
-	scoreplayer.setCharacterSize(40);
-	scoreplayer.setPosition(400, 570);
+	scoreplayer.setFillColor(sf::Color::White);
+	scoreplayer.setCharacterSize(70);
+	scoreplayer.setPosition(1400, 650);
 
 	//////////////////////////////// text name /////////////////////////////////////////
 
@@ -237,7 +237,7 @@ int main()
 	soundclicks.setBuffer(soundclick);
 
 
-	//¬‘ß
+	//‡∏¢‡∏¥‡∏á
 	sf::SoundBuffer soundshoot;
 	soundshoot.loadFromFile("Resource/Sound/shoots.wav");
 	sf::Sound soundshoots;
@@ -255,7 +255,7 @@ int main()
 	sf::Sound soundscoreups;
 	soundscoreups.setBuffer(soundscoreup);
 
-	//™π + score down
+	//‡∏ä‡∏ô + score down
 	sf::SoundBuffer soundscoredown;
 	soundscoredown.loadFromFile("Resource/Sound/colider+scoredown.wav");
 	sf::Sound soundscoredowns;
@@ -300,13 +300,13 @@ int main()
 
 
 	/////////////////////////////////Background/////////////////////////////////
-	//æ◊ÈπÀ≈—ß
+	//‡∏û‡∏∑‡πâ‡∏ô‡∏´‡∏•‡∏±‡∏á
 	sf::Texture bgtexture[2];
 	sf::Sprite bg[2];
 	bgtexture[0].loadFromFile("Resource/Background/bggame3.png");
 	bgtexture[1].loadFromFile("Resource/Background/bggame3.png");
 	bg[0].setPosition(sf::Vector2f(-100, 0));
-	bg[1].setPosition(sf::Vector2f(0, 0));//‡´Áµµ”·ÀπËß©“° „ÀÈ™‘¥´È“¬‰¡Ë¡’¢Õ∫¥”
+	bg[1].setPosition(sf::Vector2f(0, 0));//‡πÄ‡∏ã‡πá‡∏ï‡∏ï‡∏≥‡πÅ‡∏´‡∏ô‡πà‡∏á‡∏â‡∏≤‡∏Å ‡πÉ‡∏´‡πâ‡∏ä‡∏¥‡∏î‡∏ã‡πâ‡∏≤‡∏¢‡πÑ‡∏°‡πà‡∏°‡∏µ‡∏Ç‡∏≠‡∏ö‡∏î‡∏≥
 
 	bg[0].setTexture(bgtexture[0]);
 	bg[1].setTexture(bgtexture[1]);
@@ -331,7 +331,7 @@ int main()
 	enemy1pic.loadFromFile("Resource/Sprite/mon1.png");
 	enemy1.setTexture(&enemy1pic);
 	std::vector<RectangleShape> enemies1;
-	enemies1.push_back(RectangleShape(enemy1)); //«“¥¡Õπ1
+	enemies1.push_back(RectangleShape(enemy1)); //‡∏ß‡∏≤‡∏î‡∏°‡∏≠‡∏ô1
 
 	int enemySpawnTimer1 = 0;
 	int enemySpawnTimer2 = 0;
@@ -361,7 +361,7 @@ int main()
 	projectilespic1.loadFromFile("Resource/Weapon/weapon.png");
 	bullet1.setTexture(&projectilespic1);
 	std::vector<RectangleShape> bullets1;
-	bullets1.push_back(RectangleShape(bullet1));//«“¥°√– ÿπ ª‘Í«Ê
+	bullets1.push_back(RectangleShape(bullet1));//‡∏ß‡∏≤‡∏î‡∏Å‡∏£‡∏∞‡∏™‡∏∏‡∏ô ‡∏õ‡∏¥‡πä‡∏ß‡πÜ
 
 	/////////////////////////////////Item/////////////////////////////////
 	sf::RectangleShape itemheart(sf::Vector2f(50.0f, 50.0f));
@@ -372,7 +372,7 @@ int main()
 	//
 	sf::Clock Itemclock;
 
-	//sf::RectangleShape item(sf::Vector2f(20.0f, 30.0f));  // ¢Õß monepic
+	//sf::RectangleShape item(sf::Vector2f(20.0f, 30.0f));  // ‡∏Ç‡∏≠‡∏á monepic
 	sf::Texture textureItem1;
 	textureItem1.loadFromFile("Resource/Item/itemheart.png");
 	sf::Texture textureItem2;
@@ -396,22 +396,22 @@ int main()
 	sf::Texture nameplayerinput;
 	nameplayerinput.loadFromFile("Resource/Username/bglogin.png");
 	input_name.setTexture(&nameplayerinput);
-	input_name.setPosition({ 0,0 });  // µ”·ÀπËß«ß°≈¡ (x,y)
+	input_name.setPosition({ 0,0 });  // ‡∏ï‡∏≥‡πÅ‡∏´‡∏ô‡πà‡∏á‡∏ß‡∏á‡∏Å‡∏•‡∏° (x,y)
 
 
 	/////////////////////////////////Highscore/////////////////////////////////
 	std::vector<std::pair<int, std::string>> highScore;
-	bool collectHS = false;        /// r §◊Õ read file
+	bool collectHS = false;        /// r ‡∏Ñ‡∏∑‡∏≠ read file
 	LoadHighscoreList(&highScore);
 
-	//„ Ë username
-	TextBox input(40, Color::Black , &word, Vector2f(245.0f, 405.0f), true, true, 7);
+	//‡πÉ‡∏™‡πà username
+	TextBox input(70, Color::Black , &word, Vector2f(850.0f, 600.0f), true, true, 7);
 	string user_name;
 
 
 	/////////////////////////////////Auto run background/////////////////////////////////
-	//æ◊ÈπÀ≈—ßµËÕ‰ª‡√◊ËÕ¬Ê
-	std::vector<Background> backgrounds; //™◊ËÕ backgrounds
+	//‡∏û‡∏∑‡πâ‡∏ô‡∏´‡∏•‡∏±‡∏á‡∏ï‡πà‡∏≠‡πÑ‡∏õ‡πÄ‡∏£‡∏∑‡πà‡∏≠‡∏¢‡πÜ
+	std::vector<Background> backgrounds; //‡∏ä‡∏∑‡πà‡∏≠ backgrounds
 	backgrounds.push_back(Background(&bgtexture[0], -100.f));
 	backgrounds.push_back(Background(&bgtexture[1], -100.f));
 
@@ -448,14 +448,14 @@ int main()
 		window.clear();
 	};
 
-	//‡ª‘¥‡°¡¡“
+	//‡πÄ‡∏õ‡∏¥‡∏î‡πÄ‡∏Å‡∏°‡∏°‡∏≤
 	while (window.isOpen())
 	{
 		while (game == 0)
 		{
 			_Refresh();
 
-			//«“¥ÀπÈ“‡¡πŸ
+			//‡∏ß‡∏≤‡∏î‡∏´‡∏ô‡πâ‡∏≤‡πÄ‡∏°‡∏ô‡∏π
 			/*bgsound1.play();*/
 			bgmenu.Draw(window);
 			start.Draw(window);
@@ -564,20 +564,20 @@ int main()
 			backtomenu.Draw(window);
 			input.setSelected(true);
 
-			username.setString(user_name);   // ‡Õ“™◊ËÕ¡“· ¥ß
-			scoreplayer.setString(to_string(scoreCount));   // ‡Õ“ score ¡“· ¥ß
+			username.setString(user_name);   // ‡πÄ‡∏≠‡∏≤‡∏ä‡∏∑‡πà‡∏≠‡∏°‡∏≤‡πÅ‡∏™‡∏î‡∏á
+			scoreplayer.setString(to_string(scoreCount));   // ‡πÄ‡∏≠‡∏≤ score ‡∏°‡∏≤‡πÅ‡∏™‡∏î‡∏á
 			window.draw(username);
 			window.draw(scoreplayer);
 
-			if (!collectHS) {  // ‡§ ‡°Á∫ °Õ°—∫™◊ËÕ 
+			if (!collectHS) {  // ‡πÄ‡∏Ñ‡∏™‡πÄ‡∏Å‡πá‡∏ö‡∏™‡∏Å‡∏≠‡∏Å‡∏±‡∏ö‡∏ä‡∏∑‡πà‡∏≠ 
 				highScore.clear();
 				LoadHighscoreList(&highScore);
 
 				if (user_name == "") {
-					user_name = "-"; // °√≥’‰¡Ë„ Ë™◊ËÕ 
+					user_name = "-"; // ‡∏Å‡∏£‡∏ì‡∏µ‡πÑ‡∏°‡πà‡πÉ‡∏™‡πà‡∏ä‡∏∑‡πà‡∏≠ 
 				}
-				highScore.push_back(std::make_pair(scoreCount, user_name));  // ‡°Á∫§Ë“µ—«‡≈¢ °—∫™◊ËÕ player 
-				//std::sort(highScore.begin(), highScore.end(), std::greater<int>{});   // ‡√’¬ß§Ë“®“° πÈÕ¬‰ª¡“° score
+				highScore.push_back(std::make_pair(scoreCount, user_name));  // ‡πÄ‡∏Å‡πá‡∏ö‡∏Ñ‡πà‡∏≤‡∏ï‡∏±‡∏ß‡πÄ‡∏•‡∏Ç ‡∏Å‡∏±‡∏ö‡∏ä‡∏∑‡πà‡∏≠ player 
+				//std::sort(highScore.begin(), highScore.end(), std::greater<int>{});   // ‡πÄ‡∏£‡∏µ‡∏¢‡∏á‡∏Ñ‡πà‡∏≤‡∏à‡∏≤‡∏Å ‡∏ô‡πâ‡∏≠‡∏¢‡πÑ‡∏õ‡∏°‡∏≤‡∏Å score
 				
 				FILE* file = fopen("score.dat", "w");
 				char temp[26];
@@ -607,7 +607,7 @@ int main()
 			window.display();
 		}
 
-		//ÀπÈ“ username
+		//‡∏´‡∏ô‡πâ‡∏≤ username
 		while (game == 5)
 		{
 			input.setSelected(true);
@@ -629,19 +629,19 @@ int main()
 			}
 			window.draw(input_name);
 			input.draw(window);
-			back.Draw(window); // ªÿË¡¬ÈÕπ°≈—∫
+			back.Draw(window); // ‡∏õ‡∏∏‡πà‡∏°‡∏¢‡πâ‡∏≠‡∏ô‡∏Å‡∏•‡∏±‡∏ö
 			window.display();
 			if (back.getGlobalBounds(window)) {
 				back.setScale(sf::Vector2f(0.5f, 0.5f));
 			}
 			else {
-				back.setScale(sf::Vector2f(0.6f, 0.6f));  // „ÀÈ¢π“¥„À≠Ë¢÷Èπ‡¡◊ËÕ™’È
+				back.setScale(sf::Vector2f(0.6f, 0.6f));  // ‡πÉ‡∏´‡πâ‡∏Ç‡∏ô‡∏≤‡∏î‡πÉ‡∏´‡∏ç‡πà‡∏Ç‡∏∂‡πâ‡∏ô‡πÄ‡∏°‡∏∑‡πà‡∏≠‡∏ä‡∏µ‡πâ
 			}
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && back.getGlobalBounds(window))
 			{
 				game = 0;
 			}
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))   // À°·≈È«‰ªÀπÈ“‡¡πŸ‡≈¬
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))   // ‡∏´‡∏Å‡πÅ‡∏•‡πâ‡∏ß‡πÑ‡∏õ‡∏´‡∏ô‡πâ‡∏≤‡πÄ‡∏°‡∏ô‡∏π‡πÄ‡∏•‡∏¢
 			{
 				game = 0;
 			}
@@ -679,7 +679,7 @@ int main()
 			//bullet1
 			if (shootTimer1 < 30)
 				shootTimer1++;
-			if (Keyboard::isKeyPressed(Keyboard::Space) && shootTimer1 >= 30) //°¥¬‘ßßß
+			if (Keyboard::isKeyPressed(Keyboard::Space) && shootTimer1 >= 30) //‡∏Å‡∏î‡∏¢‡∏¥‡∏á‡∏á‡∏á
 			{
 				soundclicks.play();
 				if (bullets1.size() < 5) {
@@ -728,7 +728,7 @@ int main()
 				{
 					enemies1.erase(enemies1.begin() + i);
 					soundscoredowns.play();
-					//™π·≈È«‡≈◊Õ¥≈¥
+					//‡∏ä‡∏ô‡πÅ‡∏•‡πâ‡∏ß‡πÄ‡∏•‡∏∑‡∏≠‡∏î‡∏•‡∏î
 					if (hit == 0)
 					{
 						hit++;
@@ -793,7 +793,7 @@ int main()
 				{
 					enemies2.erase(enemies2.begin() + i);
 					soundscoredowns.play();
-					//™π·≈È«‡≈◊Õ¥≈¥
+					//‡∏ä‡∏ô‡πÅ‡∏•‡πâ‡∏ß‡πÄ‡∏•‡∏∑‡∏≠‡∏î‡∏•‡∏î
 					if (hit == 0)
 					{
 						hit++;
@@ -876,7 +876,7 @@ int main()
 				sf::Texture* pTexture = &textureItem1;
 				float scale = 1;
 
-				int rand_item = rand() % 5; //  ÿË¡„ÀÈ‰Õ‡∑Á¡‡°‘¥
+				int rand_item = rand() % 5; // ‡∏™‡∏∏‡πà‡∏°‡πÉ‡∏´‡πâ‡πÑ‡∏≠‡πÄ‡∏ó‡πá‡∏°‡πÄ‡∏Å‡∏¥‡∏î
 				if (rand_item == 0) { pTexture = &textureItem1; scale = 1; }
 				else if (rand_item == 1) { pTexture = &textureItem2; }
 				else if (rand_item == 2) { pTexture = &textureItem3; scale = 1; }
@@ -889,7 +889,7 @@ int main()
 				newItem.obj.setTexture(pTexture);
 				newItem.obj.setPosition(Vector2f(rand_x, 470.0f));
 				newItem.obj.setScale(scale, scale);
-				items.push_back(newItem);//«“¥‰Õ‡∑¡
+				items.push_back(newItem);//‡∏ß‡∏≤‡∏î‡πÑ‡∏≠‡πÄ‡∏ó‡∏°
 
 				itemSpawnTimer = 0;
 				ItemDelay = Itemclock.restart().asSeconds();
@@ -903,7 +903,7 @@ int main()
 			{
 				items[d].obj.move(-5.0f, 0.0f);
 
-				//if (items[d].getPosition().y > window.getSize().y)  //  ªÕπ ¡Õπ„ÀÈ‡°‘¥
+				//if (items[d].getPosition().y > window.getSize().y)  // ‡∏™‡∏õ‡∏≠‡∏ô ‡∏°‡∏≠‡∏ô‡πÉ‡∏´‡πâ‡πÄ‡∏Å‡∏¥‡∏î
 				//{
 				//	items.erase(items.begin() + d);
 				//	break;
@@ -912,7 +912,7 @@ int main()
 				if (player.GetGlobal().intersects(items[d].obj.getGlobalBounds()))
 				{
 					
-					// ‡°Á∫‰¥ÈÀ—«„®
+					// ‡πÄ‡∏Å‡πá‡∏ö‡πÑ‡∏î‡πâ‡∏´‡∏±‡∏ß‡πÉ‡∏à
 					if (items[d].type == 0)
 					{
 						soundhpups.play();
@@ -922,7 +922,7 @@ int main()
 							hitagain--;
 						}
 
-						if (hitagain == 2) {   // ‡´È∑°“√™π·≈È«‡≈◊Õ¥§ËÕ¬Ê≈¥
+						if (hitagain == 2) {   
 							hpplay.loadFromFile("Resource/Hp/hp2.png");
 							hitagain--;
 						}
@@ -951,17 +951,17 @@ int main()
 							soundgameovers.play();
 						}
 					}
-					// ‡°Á∫‰¥È dead  µ“¬‡≈¬
+					// ‡πÄ‡∏Å‡πá‡∏ö‡πÑ‡∏î‡πâ dead  ‡∏ï‡∏≤‡∏¢‡πÄ‡∏•‡∏¢
 					if (items[d].type == 1) {
 						game = 4;
 						soundgameovers.play();
 					}
-					// ‡°Á∫‰¥È score++
+					// ‡πÄ‡∏Å‡πá‡∏ö‡πÑ‡∏î‡πâ score++
 					if (items[d].type == 2) {
 						scoreCount += 20;
 						soundscoreups.play();
 					}
-					// ‡°Á∫‰¥È score--
+					// ‡πÄ‡∏Å‡πá‡∏ö‡πÑ‡∏î‡πâ score--
 					if (items[d].type == 3) {
 						scoreCount -= 10;
 						soundscoredowns.play();
@@ -1003,7 +1003,7 @@ int main()
 
 
 
-			//updateæ◊ÈπÀ≈—ß√—π‡√◊ËÕ¬Ê
+			//update‡∏û‡∏∑‡πâ‡∏ô‡∏´‡∏•‡∏±‡∏á‡∏£‡∏±‡∏ô‡πÄ‡∏£‡∏∑‡πà‡∏≠‡∏¢‡πÜ
 
 			for (Background& background : backgrounds)
 				background.Update(deltaTime);
@@ -1018,14 +1018,14 @@ int main()
 			window.draw(bg[1]);
 
 
-			//«“¥©“°‡≈◊ËÕπ
+			//‡∏ß‡∏≤‡∏î‡∏â‡∏≤‡∏Å‡πÄ‡∏•‡∏∑‡πà‡∏≠‡∏ô
 			for (Background& background : backgrounds)
 				background.Draw(window);
-			//«“¥ hp
+			//‡∏ß‡∏≤‡∏î hp
 			window.draw(hp);
 			player.Draw(window);
 
-			//«“¥ score
+			//‡∏ß‡∏≤‡∏î score
 			scoreText.setString(to_string(scoreCount));
 
 			std::map<int, std::string, std::greater<int>> scoreCount;
@@ -1053,7 +1053,7 @@ int main()
 
 			//////////////////////////////////////////////////////////////////////////////////////////
 
-			//≈ÁÕ§©“°‰¡Ë„ÀÈ‡≈◊ËÕπ‡°‘π¢Õ∫´È“¬
+			//‡∏•‡πá‡∏≠‡∏Ñ‡∏â‡∏≤‡∏Å‡πÑ‡∏°‡πà‡πÉ‡∏´‡πâ‡πÄ‡∏•‡∏∑‡πà‡∏≠‡∏ô‡πÄ‡∏Å‡∏¥‡∏ô‡∏Ç‡∏≠‡∏ö‡∏ã‡πâ‡∏≤‡∏¢
 			if (player.GetPosition().x >= 900 && player.GetPosition().x <= 6223)
 			{
 				//view.setCenter(player.GetPosition().x, 540);
