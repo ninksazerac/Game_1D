@@ -17,6 +17,35 @@ int getRand(int min, int max) {
 	return min + (max - min) * f;
 }
 
+size_t GetFileSize(FILE* stream) {
+	if (stream == nullptr) return 0;
+	int sg = ftell(stream);
+	fseek(stream, 0, SEEK_END);
+	int pos = ftell(stream);
+	fseek(stream, sg, SEEK_SET);
+	return pos;
+}
+
+void LoadHighscoreList(std::vector<std::pair<int, std::string>>* pListScore) {
+	FILE* file;
+	char temp[25];
+	std::string nameArr[6];
+	int scoreArr[6];
+	bool collectHS = false;        /// r คือ read file
+	file = fopen("score.dat", "r");
+	if (file) {
+		if (GetFileSize(file) > 0) {
+			for (int i = 0; i < 5 && !feof(file); i++) {
+				if (!fscanf(file, "%s %d\n", temp, &scoreArr[i]))
+					break;
+				nameArr[i] = temp;
+				pListScore->push_back(std::make_pair(scoreArr[i], nameArr[i]));
+			}
+		}
+		fclose(file);
+	}
+}
+
 static const float VIEW_HEIGHT = 900.0f;
 void ResizeView(const sf::RenderWindow& window, sf::View& view) //set display ให้คงที่เวลาขยาย หด
 {
@@ -132,11 +161,13 @@ int main()
 
 	sf::Text username;
 	username.setFont(word);
+	username.setFillColor(sf::Color::Black);
 	username.setCharacterSize(40);
 	username.setPosition(42, 570);
 
 	sf::Text scoreplayer;
 	scoreplayer.setFont(word);
+	scoreplayer.setFillColor(sf::Color::Black);
 	scoreplayer.setCharacterSize(40);
 	scoreplayer.setPosition(400, 570);
 
@@ -208,7 +239,7 @@ int main()
 
 	//ยิง
 	sf::SoundBuffer soundshoot;
-	soundshoot.loadFromFile("Resource/Sound/shoot.wav");
+	soundshoot.loadFromFile("Resource/Sound/shoots.wav");
 	sf::Sound soundshoots;
 	soundshoots.setBuffer(soundshoot);
 
@@ -361,31 +392,20 @@ int main()
 	int itemSpawnTimer = 0;
 
 	/////////////////////////////////input name/////////////////////////////
-	sf::RectangleShape input_name(sf::Vector2f(564.0f, 864.0f));
+	sf::RectangleShape input_name(sf::Vector2f(1920.0f, 1080.0f));
 	sf::Texture nameplayerinput;
-	nameplayerinput.loadFromFile("Resource/sprite/bglogin.png");
+	nameplayerinput.loadFromFile("Resource/Username/bglogin.png");
 	input_name.setTexture(&nameplayerinput);
 	input_name.setPosition({ 0,0 });  // ตำแหน่งวงกลม (x,y)
 
 
 	/////////////////////////////////Highscore/////////////////////////////////
 	std::vector<std::pair<int, std::string>> highScore;
-	FILE* file;
-	char temp[25];
-	std::string nameArr[6] = {};
-	int scoreArr[6] = {};
 	bool collectHS = false;        /// r คือ read file
-	file = fopen("score.dat", "r");
-	for (int i = 0; i < 5; i++) {
-		fscanf(file, "%s", temp);
-		nameArr[i] = temp;
-		fscanf(file, "%d", &scoreArr[i]);
-		highScore.push_back(std::make_pair(scoreArr[i], nameArr[i]));
-	}
-	fclose(file);
+	LoadHighscoreList(&highScore);
 
 	//ใส่ username
-	TextBox input(40, Color::White, &word, Vector2f(245.0f, 405.0f), true, true, 7);
+	TextBox input(40, Color::Black , &word, Vector2f(245.0f, 405.0f), true, true, 7);
 	string user_name;
 
 
@@ -498,20 +518,20 @@ int main()
 		{
 			_Refresh();
 			/*bgsound.pause();*/
-			highScore.erase(highScore.begin(), highScore.end());
-			file = fopen("./name_player.txt", "r");
-			for (int i = 0; i < 5; i++) {
-				fscanf(file, "%s", temp);
-				nameArr[i] = temp;
-				fscanf(file, "%d", &scoreArr[i]);
-				highScore.push_back(std::make_pair(scoreArr[i], nameArr[i]));
-			}
-			fclose(file);
-
+			highScore.clear();
+			LoadHighscoreList(&highScore);
 
 			bgscore.Draw(window);
 			back.Draw(window);
 
+			for (int i = 0; i < highScore.size(); ++i) {
+				usernames_all[i].setString(highScore[i].second);
+				scoreplayers_all[i].setString(std::to_string(highScore[i].first));
+
+				window.draw(usernames_all[i]);
+				window.draw(scoreplayers_all[i]);
+			}
+			
 
 			if (back.getGlobalBounds(window)) {
 				back.setScale(sf::Vector2f(0.4f, 0.4f));
@@ -540,39 +560,34 @@ int main()
 		while (game == 4)
 		{
 			_Refresh();
-			
+			bggameover.Draw(window);
+			backtomenu.Draw(window);
 			input.setSelected(true);
+
 			username.setString(user_name);   // เอาชื่อมาแสดง
 			scoreplayer.setString(to_string(scoreCount));   // เอา score มาแสดง
-
+			window.draw(username);
+			window.draw(scoreplayer);
 
 			if (!collectHS) {  // เคสเก็บสกอกับชื่อ 
-				highScore.erase(highScore.begin(), highScore.end());
-				file = fopen("score.dat", "r");
-				for (int i = 0; i < 5; i++) {
-					fscanf(file, "%s", temp);
-					nameArr[i] = temp;
-					fscanf(file, "%d", &scoreArr[i]);
-					highScore.push_back(std::make_pair(scoreArr[i], nameArr[i]));
-				}
+				highScore.clear();
+				LoadHighscoreList(&highScore);
+
 				if (user_name == "") {
 					user_name = "-"; // กรณีไม่ใส่ชื่อ 
 				}
 				highScore.push_back(std::make_pair(scoreCount, user_name));  // เก็บค่าตัวเลข กับชื่อ player 
-				std::sort(highScore.begin(), highScore.end());   // เรียงค่าจาก น้อยไปมาก score
-				fclose(file);
-				file = fopen(".score.dat", "w");
-				char temp[26] = {};
-				for (int i = 5; i >= 1; i--) {
+				//std::sort(highScore.begin(), highScore.end(), std::greater<int>{});   // เรียงค่าจาก น้อยไปมาก score
+				
+				FILE* file = fopen("score.dat", "w");
+				char temp[26];
+				for (int i = 0; i < highScore.size(); i++) {
 					strcpy(temp, highScore[i].second.c_str());
 					fprintf(file, "%s %d\n", temp, highScore[i].first);
 				}
 				fclose(file);
 				collectHS = true;
 			}
-
-			bggameover.Draw(window);
-			backtomenu.Draw(window);
 
 			if (backtomenu.getGlobalBounds(window)) {
 				backtomenu.setScale(sf::Vector2f(0.5f, 0.5f));
@@ -595,6 +610,8 @@ int main()
 		//หน้า username
 		while (game == 5)
 		{
+			input.setSelected(true);
+
 			while (window.pollEvent(evnt))
 			{
 				if (evnt.type == Event::Closed) window.close();
@@ -602,6 +619,7 @@ int main()
 				if (evnt.type == Event::KeyPressed && evnt.key.code == Keyboard::Enter)
 				{
 					user_name = input.getInput();
+					input.clear();
 					collectHS = false;
 					input.setSelected(false);
 
@@ -609,7 +627,6 @@ int main()
 				}
 
 			}
-
 			window.draw(input_name);
 			input.draw(window);
 			back.Draw(window); // ปุ่มย้อนกลับ
@@ -665,7 +682,7 @@ int main()
 			if (Keyboard::isKeyPressed(Keyboard::Space) && shootTimer1 >= 30) //กดยิงงง
 			{
 				soundclicks.play();
-				if (bullets1.size() <= 5) {
+				if (bullets1.size() < 5) {
 					bullet1.setPosition(playerCenter);
 					bullets1.push_back(RectangleShape(bullet1));
 					
