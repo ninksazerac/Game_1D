@@ -597,10 +597,10 @@ int main()
 			}
 
 			if (backtomenu.getGlobalBounds(window)) {
-				backtomenu.setScale(sf::Vector2f(0.5f, 0.5f));
+				backtomenu.setScale(sf::Vector2f(0.4f, 0.4f));
 			}
 			else {
-				backtomenu.setScale(sf::Vector2f(0.4f, 0.4f));
+				backtomenu.setScale(sf::Vector2f(0.3f, 0.3f));
 			}
 
 			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
