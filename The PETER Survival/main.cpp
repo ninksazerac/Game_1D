@@ -45,7 +45,7 @@ void LoadHighscoreList(std::vector<std::pair<int, std::string>>* pListScore) {
 		fclose(file);
 	}
 }
-
+//จอ
 static const float VIEW_HEIGHT = 900.0f;
 void ResizeView(const sf::RenderWindow& window, sf::View& view) //set display ให้คงที่เวลาขยาย หด
 {
