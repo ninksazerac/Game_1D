@@ -24,6 +24,7 @@
     <ProjectGuid>{4067b994-ac17-4670-b84f-7126e845155d}</ProjectGuid>
     <RootNamespace>ThePETERSurvival</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>GUNSO!!</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
