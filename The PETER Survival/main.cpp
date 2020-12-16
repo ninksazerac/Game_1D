@@ -163,13 +163,13 @@ int main()
 	username.setFont(word);
 	username.setFillColor(sf::Color::White);
 	username.setCharacterSize(70);
-	username.setPosition(350, 650);
+	username.setPosition(350, 680);
 
 	sf::Text scoreplayer;
 	scoreplayer.setFont(word);
 	scoreplayer.setFillColor(sf::Color::White);
 	scoreplayer.setCharacterSize(70);
-	scoreplayer.setPosition(1400, 650);
+	scoreplayer.setPosition(1400, 680);
 
 	//////////////////////////////// text name /////////////////////////////////////////
 
@@ -177,45 +177,45 @@ int main()
 	sf::Text scoreplayers_all[5];
 	//name
 	usernames_all[0].setFont(word);
-	usernames_all[0].setCharacterSize(40);
-	usernames_all[0].setPosition(125, 250);
+	usernames_all[0].setCharacterSize(50);
+	usernames_all[0].setPosition(660, 250);
 
 	usernames_all[1].setFont(word);
-	usernames_all[1].setCharacterSize(40);
-	usernames_all[1].setPosition(125, 350);
+	usernames_all[1].setCharacterSize(50);
+	usernames_all[1].setPosition(660, 350);
 
 	usernames_all[2].setFont(word);
-	usernames_all[2].setCharacterSize(40);
-	usernames_all[2].setPosition(125, 450);
+	usernames_all[2].setCharacterSize(50);
+	usernames_all[2].setPosition(660, 450);
 
 	usernames_all[3].setFont(word);
-	usernames_all[3].setCharacterSize(40);
-	usernames_all[3].setPosition(125, 550);
+	usernames_all[3].setCharacterSize(50);
+	usernames_all[3].setPosition(660, 550);
 
 	usernames_all[4].setFont(word);
-	usernames_all[4].setCharacterSize(40);
-	usernames_all[4].setPosition(125, 650);
+	usernames_all[4].setCharacterSize(50);
+	usernames_all[4].setPosition(660, 650);
 
 	// score
 	scoreplayers_all[0].setFont(word);
-	scoreplayers_all[0].setCharacterSize(40);
-	scoreplayers_all[0].setPosition(350, 250);
+	scoreplayers_all[0].setCharacterSize(50);
+	scoreplayers_all[0].setPosition(1250, 250);
 
 	scoreplayers_all[1].setFont(word);
-	scoreplayers_all[1].setCharacterSize(40);
-	scoreplayers_all[1].setPosition(350, 350);
+	scoreplayers_all[1].setCharacterSize(50);
+	scoreplayers_all[1].setPosition(1250, 350);
 
 	scoreplayers_all[2].setFont(word);
-	scoreplayers_all[2].setCharacterSize(40);
-	scoreplayers_all[2].setPosition(350, 450);
+	scoreplayers_all[2].setCharacterSize(50);
+	scoreplayers_all[2].setPosition(1250, 450);
 
 	scoreplayers_all[3].setFont(word);
-	scoreplayers_all[3].setCharacterSize(40);
-	scoreplayers_all[3].setPosition(350, 550);
+	scoreplayers_all[3].setCharacterSize(50);
+	scoreplayers_all[3].setPosition(1250, 550);
 
 	scoreplayers_all[4].setFont(word);
-	scoreplayers_all[4].setCharacterSize(40);
-	scoreplayers_all[4].setPosition(350, 650);
+	scoreplayers_all[4].setCharacterSize(50);
+	scoreplayers_all[4].setPosition(1250, 650);
 
 
 	/////////////////////////////////Sound/////////////////////////////////
@@ -577,7 +577,14 @@ int main()
 					user_name = "-"; // กรณีไม่ใส่ชื่อ 
 				}
 				highScore.push_back(std::make_pair(scoreCount, user_name));  // เก็บค่าตัวเลข กับชื่อ player 
-				//std::sort(highScore.begin(), highScore.end(), std::greater<int>{});   // เรียงค่าจาก น้อยไปมาก score
+
+				struct _greater {
+					using T = std::pair<int, std::string>;
+					constexpr bool operator()(const T& _Left, const T& _Right) const {
+						return _Left.first > _Right.first;
+					}
+				};
+				std::sort(highScore.begin(), highScore.end(), _greater{});   // เรียงค่าจาก น้อยไปมาก score
 				
 				FILE* file = fopen("score.dat", "w");
 				char temp[26];
@@ -629,18 +636,9 @@ int main()
 			}
 			window.draw(input_name);
 			input.draw(window);
-			back.Draw(window); // ปุ่มย้อนกลับ
+			
 			window.display();
-			if (back.getGlobalBounds(window)) {
-				back.setScale(sf::Vector2f(0.5f, 0.5f));
-			}
-			else {
-				back.setScale(sf::Vector2f(0.6f, 0.6f));  // ให้ขนาดใหญ่ขึ้นเมื่อชี้
-			}
-			if (sf::Mouse::isButtonPressed(sf::Mouse::Left) && back.getGlobalBounds(window))
-			{
-				game = 0;
-			}
+			
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))   // หกแล้วไปหน้าเมนูเลย
 			{
 				game = 0;
@@ -682,7 +680,7 @@ int main()
 			if (Keyboard::isKeyPressed(Keyboard::Space) && shootTimer1 >= 30) //กดยิงงง
 			{
 				soundclicks.play();
-				if (bullets1.size() < 5) {
+				if (bullets1.size() < 4) {
 					bullet1.setPosition(playerCenter);
 					bullets1.push_back(RectangleShape(bullet1));
 					
